@@ -1,5 +1,5 @@
 export interface Property {
-  propertyID?: string
+  propertyID: string
   propertyName: string
   type: number
   typeName: string
@@ -18,23 +18,46 @@ export interface Property {
 }
 
 export interface RoomType {
-  roomTypeID?: string
+  roomTypeID: string
   roomTypeName: string
   floor: number
   capacity: number
   price: number
   facility: string
   description: string
-  roomIDs: string[]
-  listRoom: any[] | null
-  createdDate: string | null
-  updatedDate: string | null
+  roomIDs: string[] | null
+  listRoom: Room[] | null
+  createdDate: string
+  updatedDate: string
+}
+
+export interface Room {
+  roomID: string
+  name: string
+  availabilityStatus: number
+  availabilityStatusName: string
+  activeRoom: number
+  activeRoomName: string
+  maintenanceStart: string | null
+  maintenanceEnd: string | null
+  capacity: number
+  price: number
+  floor: number
+  roomTypeID: string
+  roomTypeName: string
+  createdDate: string
+  updatedDate: string
 }
 
 export interface PropertyFilter {
   search: string
   type: string
   status: string
+}
+
+export interface DateFilter {
+  checkIn: string
+  checkOut: string
 }
 
 export enum PropertyType {
@@ -76,14 +99,13 @@ export interface RoomTypeForm {
   roomTypeDescription: string
 }
 
-// Request sesuai dengan BE
 export interface CreatePropertyRequest {
   propertyName: string
-  type: number  // 1=Hotel, 2=Villa, 3=Apartemen
+  type: number
   address: string
-  province: number  // province code as number
+  province: number
   description: string
-  totalRoom: number  // total dari semua unitCount
+  totalRoom: number
   ownerName: string
   ownerID: string
   roomTypes: Array<{
@@ -127,4 +149,42 @@ export const ROOM_TYPE_OPTIONS: Record<string, string[]> = {
     '3BR',
     'Penthouse'
   ]
+}
+
+// Province Map for display
+export const PROVINCE_MAP: Record<number, string> = {
+  11: 'Aceh',
+  12: 'Sumatera Utara',
+  13: 'Sumatera Barat',
+  14: 'Riau',
+  15: 'Jambi',
+  16: 'Sumatera Selatan',
+  17: 'Bengkulu',
+  18: 'Lampung',
+  19: 'Kepulauan Bangka Belitung',
+  21: 'Kepulauan Riau',
+  31: 'DKI Jakarta',
+  32: 'Jawa Barat',
+  33: 'Jawa Tengah',
+  34: 'DI Yogyakarta',
+  35: 'Jawa Timur',
+  36: 'Banten',
+  51: 'Bali',
+  52: 'Nusa Tenggara Barat',
+  53: 'Nusa Tenggara Timur',
+  61: 'Kalimantan Barat',
+  62: 'Kalimantan Tengah',
+  63: 'Kalimantan Selatan',
+  64: 'Kalimantan Timur',
+  65: 'Kalimantan Utara',
+  71: 'Sulawesi Utara',
+  72: 'Sulawesi Tengah',
+  73: 'Sulawesi Selatan',
+  74: 'Sulawesi Tenggara',
+  75: 'Gorontalo',
+  76: 'Sulawesi Barat',
+  81: 'Maluku',
+  82: 'Maluku Utara',
+  91: 'Papua',
+  92: 'Papua Barat',
 }

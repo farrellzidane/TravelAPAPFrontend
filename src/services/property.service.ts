@@ -1,47 +1,43 @@
-import type { Property, Province, CreatePropertyRequest, ApiResponse } from '@/interfaces/property.interface'
+import axios, { type AxiosResponse } from 'axios'
+import type { Property, Province, CreatePropertyRequest, ApiResponse, DateFilter } from '@/interfaces/property.interface'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 const WILAYAH_API = 'https://www.emsifa.com/api-wilayah-indonesia/api'
 
 export const propertyService = {
   async getAllProperties(): Promise<Property[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/property`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      const response: AxiosResponse<ApiResponse<Property[]>> = 
+        await axios.get(`${API_BASE_URL}/api/property/viewall`)
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      const result: ApiResponse<Property[]> = await response.json()
-      
-      // Return data dari response wrapper
-      return result.data || []
+      return response.data.data || []
     } catch (error) {
       console.error('Error in getAllProperties:', error)
       throw error
     }
   },
 
-  async getPropertyById(id: string): Promise<Property> {
+  async getPropertyById(id: string, filter?: DateFilter): Promise<Property> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/property/${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      let url = `${API_BASE_URL}/api/property/${id}`
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      // Add query params if filter is provided
+      if (filter?.checkIn && filter?.checkOut) {
+        const params = new URLSearchParams({
+          checkIn: filter.checkIn,
+          checkOut: filter.checkOut
+        })
+        url += `?${params.toString()}`
       }
       
-      const result: ApiResponse<Property> = await response.json()
-      return result.data
+      console.log('Fetching property detail from:', url)
+      
+      const response: AxiosResponse<ApiResponse<Property>> = 
+        await axios.get(url)
+      
+      console.log('Property detail response:', response.data)
+      
+      return response.data.data
     } catch (error) {
       console.error('Error in getPropertyById:', error)
       throw error
@@ -50,43 +46,44 @@ export const propertyService = {
 
   async createProperty(data: CreatePropertyRequest): Promise<Property> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/property/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
+      console.log('Creating property with data:', data)
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null)
-        throw new Error(errorData?.message || `HTTP error! status: ${response.status}`)
+      const response: AxiosResponse<ApiResponse<Property>> = 
+        await axios.post(`${API_BASE_URL}/api/property/create`, data)
+      
+      console.log('Create property response:', response.data)
+      
+      return response.data.data
+    } catch (error: any) {
+      console.error('Error in createProperty:', error)
+      
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message)
       }
       
-      const result: ApiResponse<Property> = await response.json()
-      return result.data
+      throw error
+    }
+  },
+
+  async deleteProperty(id: string): Promise<void> {
+    try {
+      await axios.delete(`${API_BASE_URL}/api/property/delete/${id}`)
     } catch (error) {
-      console.error('Error in createProperty:', error)
+      console.error('Error in deleteProperty:', error)
       throw error
     }
   },
 
   async getProvinces(): Promise<Province[]> {
     try {
-      const response = await fetch(`${WILAYAH_API}/provinces.json`)
+      const response = await axios.get(`${WILAYAH_API}/provinces.json`)
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch provinces')
-      }
-      
-      const data = await response.json()
-      return data.map((province: { id: string; name: string }) => ({
+      return response.data.map((province: { id: string; name: string }) => ({
         code: province.id,
         name: province.name
       }))
     } catch (error) {
       console.error('Error fetching provinces:', error)
-      // Return fallback data if API fails
       return [
         { code: '11', name: 'Aceh' },
         { code: '12', name: 'Sumatera Utara' },
@@ -123,24 +120,6 @@ export const propertyService = {
         { code: '91', name: 'Papua' },
         { code: '92', name: 'Papua Barat' },
       ]
-    }
-  },
-
-  async deleteProperty(id: string): Promise<void> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/property/delete/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-    } catch (error) {
-      console.error('Error in deleteProperty:', error)
-      throw error
     }
   }
 }
