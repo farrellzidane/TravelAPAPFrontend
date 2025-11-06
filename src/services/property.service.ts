@@ -8,7 +8,7 @@ export const propertyService = {
   async getAllProperties(): Promise<Property[]> {
     try {
       const response: AxiosResponse<ApiResponse<Property[]>> = 
-        await axios.get(`${API_BASE_URL}/api/property/viewall`)
+        await axios.get(`${API_BASE_URL}/api/property`)
       
       return response.data.data || []
     } catch (error) {

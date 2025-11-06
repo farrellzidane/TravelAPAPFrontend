@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios'
-import type { Booking, CreateBookingRequest, BookingFilter } from '@/interfaces/booking.interface'
+import type { Booking, CreateBookingRequest, BookingFilter, CreateBookingWithoutRoomRequest } from '@/interfaces/booking.interface'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
@@ -68,7 +68,7 @@ export const bookingService = {
     }
   },
 
-  async createBooking(data: CreateBookingRequest): Promise<Booking> {
+  async createBooking(data: CreateBookingRequest | CreateBookingWithoutRoomRequest): Promise<Booking> {
     try {
       console.log('Creating booking:', data)
       

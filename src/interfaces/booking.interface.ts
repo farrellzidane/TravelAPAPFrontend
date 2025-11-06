@@ -38,6 +38,20 @@ export interface CreateBookingRequest {
   capacity: number
 }
 
+export interface CreateBookingWithoutRoomRequest {
+  propertyID: string
+  roomTypeID: string
+  roomID: string
+  checkInDate: string
+  checkOutDate: string
+  customerID: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  isBreakfast: boolean
+  capacity: number
+}
+
 export interface BookingFilter {
   status?: number | string
   search?: string
