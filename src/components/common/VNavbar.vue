@@ -1,35 +1,35 @@
 <template>
-  <nav class="bg-white shadow-md">
+  <nav class="bg-white shadow-lg">
     <div class="container mx-auto px-4">
-      <div class="flex items-center justify-between h-16">
+      <div class="flex justify-between items-center h-16">
         <!-- Logo/Brand -->
-        <router-link 
-          to="/" 
-          class="text-xl font-bold text-blue-600 hover:text-blue-700 transition duration-200"
+        <router-link
+          to="/"
+          class="text-2xl font-bold text-blue-600 hover:text-blue-700 transition"
         >
           TravelAPAP
         </router-link>
 
-        <!-- Desktop Navigation -->
+        <!-- Navigation Links -->
         <div class="hidden md:flex items-center space-x-8">
           <router-link
             to="/property"
-            class="text-gray-700 hover:text-blue-600 font-medium transition duration-200"
-            active-class="text-blue-600"
+            class="text-gray-700 hover:text-blue-600 font-medium transition"
+            active-class="text-blue-600 font-semibold"
           >
             Property
           </router-link>
           <router-link
-            to="/booking"
-            class="text-gray-700 hover:text-blue-600 font-medium transition duration-200"
-            active-class="text-blue-600"
+            to="/bookings"
+            class="text-gray-700 hover:text-blue-600 font-medium transition"
+            active-class="text-blue-600 font-semibold"
           >
-            Booking
+            Bookings
           </router-link>
           <router-link
             to="/statistic"
-            class="text-gray-700 hover:text-blue-600 font-medium transition duration-200"
-            active-class="text-blue-600"
+            class="text-gray-700 hover:text-blue-600 font-medium transition"
+            active-class="text-blue-600 font-semibold"
           >
             Statistic
           </router-link>
@@ -38,16 +38,11 @@
         <!-- Mobile Menu Button -->
         <button
           @click="toggleMobileMenu"
-          class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition duration-200"
+          class="md:hidden text-gray-700 hover:text-blue-600 transition"
         >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
-              v-if="!isMobileMenuOpen"
+              v-if="!mobileMenuOpen"
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
@@ -64,35 +59,34 @@
         </button>
       </div>
 
-      <!-- Mobile Navigation -->
-      <div
-        v-if="isMobileMenuOpen"
-        class="md:hidden py-4 border-t border-gray-200"
-      >
-        <router-link
-          to="/property"
-          class="block py-2 text-gray-700 hover:text-blue-600 font-medium transition duration-200"
-          active-class="text-blue-600"
-          @click="closeMobileMenu"
-        >
-          Property
-        </router-link>
-        <router-link
-          to="/booking"
-          class="block py-2 text-gray-700 hover:text-blue-600 font-medium transition duration-200"
-          active-class="text-blue-600"
-          @click="closeMobileMenu"
-        >
-          Booking
-        </router-link>
-        <router-link
-          to="/statistic"
-          class="block py-2 text-gray-700 hover:text-blue-600 font-medium transition duration-200"
-          active-class="text-blue-600"
-          @click="closeMobileMenu"
-        >
-          Statistic
-        </router-link>
+      <!-- Mobile Menu -->
+      <div v-if="mobileMenuOpen" class="md:hidden py-4 border-t border-gray-200">
+        <div class="flex flex-col space-y-2">
+          <router-link
+            to="/property"
+            @click="closeMobileMenu"
+            class="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition"
+            active-class="bg-blue-50 text-blue-600 font-semibold"
+          >
+            Property
+          </router-link>
+          <router-link
+            to="/bookings"
+            @click="closeMobileMenu"
+            class="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition"
+            active-class="bg-blue-50 text-blue-600 font-semibold"
+          >
+            Bookings
+          </router-link>
+          <router-link
+            to="/statistic"
+            @click="closeMobileMenu"
+            class="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition"
+            active-class="bg-blue-50 text-blue-600 font-semibold"
+          >
+            Statistic
+          </router-link>
+        </div>
       </div>
     </div>
   </nav>
@@ -101,13 +95,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const isMobileMenuOpen = ref(false)
+const mobileMenuOpen = ref(false)
 
 const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value
+  mobileMenuOpen.value = !mobileMenuOpen.value
 }
 
 const closeMobileMenu = () => {
-  isMobileMenuOpen.value = false
+  mobileMenuOpen.value = false
 }
 </script>

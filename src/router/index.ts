@@ -5,6 +5,9 @@ import CreateProperty from '../views/property/CreateProperty.vue'
 import DetailProperty from '../views/property/DetailProperty.vue'
 import UpdateProperty from '../views/property/UpdateProperty.vue'
 import AddRoomType from '@/views/property/AddRoomType.vue'
+import BookingView from '../views/booking/BookingView.vue'
+import BookingDetail from '@/views/booking/BookingDetail.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -38,13 +41,19 @@ const router = createRouter({
     {
       path: '/property/updateroom/:id',
       name: 'property-add-room',
-      component: AddRoomType
+      component: AddRoomType,
     },
-    // {
-    //   path: '/booking',
-    //   name: 'booking',
-    //   component: () => import('../views/BookingView.vue'),
-    // },
+    {
+      path: '/booking',
+      name: 'booking',
+      component: BookingView,
+    },
+
+    {
+      path: '/booking/:id',
+      name: 'booking-detail',
+      component: BookingDetail,
+    }
     // {
     //   path: '/statistic',
     //   name: 'statistic',
