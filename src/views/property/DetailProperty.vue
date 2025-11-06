@@ -628,7 +628,7 @@ const getAvailableRoomsCount = (rooms: Room[] | null | undefined): number => {
 }
 
 const handleAddRoom = () => {
-  router.push(`/property/${property.value?.propertyID}/add-room`)
+  router.push(`/property/updateroom/${property.value?.propertyID}`)
 }
 
 const handleUpdateProperty = () => {

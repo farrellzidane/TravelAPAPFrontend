@@ -144,14 +144,14 @@ export interface UpdateRoomTypeForm {
 }
 
 export interface AddRoomTypeRequest {
-  propertyID: string
+  propertyId: string  // Changed from propertyID to match backend
   roomTypes: Array<{
-    roomTypeName: string
+    name: string  // Changed from roomTypeName to match backend
     facility: string
     capacity: number
     price: number
     floor: number
-    unitCount: number
+    unitCount: number  // Changed from unitCount to match backend API spec
     description: string
   }>
 }

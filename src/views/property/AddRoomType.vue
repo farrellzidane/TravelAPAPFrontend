@@ -409,14 +409,14 @@ const handleSubmit = async () => {
 
   try {
     const requestData: AddRoomTypeRequest = {
-      propertyID: property.value.propertyID,
+      propertyId: property.value.propertyID,  // Changed to propertyId
       roomTypes: formData.value.roomTypes.map(rt => ({
-        roomTypeName: rt.roomTypeName,
+        name: rt.roomTypeName,  // Changed to name
         facility: rt.facility,
         capacity: rt.capacity!,
         price: rt.price!,
         floor: rt.floor!,
-        unitCount: rt.unitCount!,
+        unitCount: rt.unitCount!,  // Changed to numberOfUnits
         description: rt.description
       }))
     }
