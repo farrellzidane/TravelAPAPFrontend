@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios'
-import type { Property, Province, CreatePropertyRequest, ApiResponse, DateFilter } from '@/interfaces/property.interface'
+import type { Property, Province, CreatePropertyRequest, ApiResponse, DateFilter, UpdatePropertyRequest } from '@/interfaces/property.interface'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 const WILAYAH_API = 'https://www.emsifa.com/api-wilayah-indonesia/api'
@@ -65,11 +65,44 @@ export const propertyService = {
     }
   },
 
-  async deleteProperty(id: string): Promise<void> {
+  async updateProperty(id: string, data: UpdatePropertyRequest): Promise<Property> {
     try {
-      await axios.delete(`${API_BASE_URL}/api/property/delete/${id}`)
-    } catch (error) {
+      console.log('Updating property with data:', data)
+      
+      const response: AxiosResponse<ApiResponse<Property>> = 
+        await axios.put(`${API_BASE_URL}/api/property/update/${id}`, data)
+      
+      console.log('Update property response:', response.data)
+      
+      return response.data.data
+    } catch (error: any) {
+      console.error('Error in updateProperty:', error)
+      
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message)
+      }
+      
+      throw error
+    }
+  },
+
+  async deleteProperty(id: string): Promise<Property> {
+    try {
+      console.log('Deleting property:', id)
+      
+      const response: AxiosResponse<ApiResponse<Property>> = 
+        await axios.delete(`${API_BASE_URL}/api/property/delete/${id}`)
+      
+      console.log('Delete property response:', response.data)
+      
+      return response.data.data
+    } catch (error: any) {
       console.error('Error in deleteProperty:', error)
+      
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message)
+      }
+      
       throw error
     }
   },

@@ -69,7 +69,7 @@
                 Update Property
               </button>
               <button
-                @click="handleDeleteProperty"
+                @click="showDeleteModal = true"
                 class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow transition"
               >
                 Delete Property
@@ -138,8 +138,29 @@
           </div>
         </div>
 
-        <!-- Date Filter Card -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+        <!-- Inactive Property Notice -->
+        <div v-if="property.activeStatus === 0" class="bg-red-50 border-2 border-red-200 rounded-2xl p-8 text-center mb-6">
+          <div class="flex flex-col items-center">
+            <div class="bg-red-100 rounded-full p-4 mb-4">
+              <svg class="w-16 h-16 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-red-800 mb-2">Property Inactive</h3>
+            <p class="text-red-700 text-lg mb-4">
+              This property has been deactivated and is no longer available for bookings.
+            </p>
+            <div class="bg-white border border-red-200 rounded-lg p-4 max-w-md">
+              <p class="text-sm text-gray-700">
+                <span class="font-semibold">Note:</span> Room types and rooms are not displayed for inactive properties.
+                To view and manage rooms, the property must be reactivated.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Date Filter Card (only show if active) -->
+        <div v-if="property.activeStatus === 1" class="bg-white rounded-2xl shadow-xl p-6 mb-6">
           <h2 class="text-xl font-bold text-gray-800 mb-4">Filter by Date</h2>
           <div class="flex flex-col md:flex-row gap-4 items-end">
             <div class="flex-1">
@@ -177,8 +198,8 @@
           </div>
         </div>
 
-        <!-- Room Types -->
-        <div class="space-y-6">
+        <!-- Room Types (only show if active) -->
+        <div v-if="property.activeStatus === 1" class="space-y-6">
           <h2 class="text-2xl font-bold text-gray-800">Room Types</h2>
 
           <div v-if="!property.roomTypes || property.roomTypes.length === 0" class="bg-white rounded-2xl shadow-xl p-8 text-center">
@@ -310,6 +331,75 @@
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showDeleteModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        @click.self="showDeleteModal = false"
+      >
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+          <!-- Modal Header -->
+          <div class="bg-red-600 text-white p-6">
+            <div class="flex items-center gap-3">
+              <div class="flex-shrink-0">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold">Delete Property?</h3>
+                <p class="text-red-100 text-sm mt-1">This action cannot be undone</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="p-6">
+            <p class="text-gray-700 mb-4">
+              Are you sure you want to delete property 
+              <span class="font-semibold text-gray-900">"{{ property?.propertyName }}"</span>?
+            </p>
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <div class="flex gap-2">
+                <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-sm text-yellow-800">
+                  <p class="font-semibold mb-1">Important Notes:</p>
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Property will be deactivated (soft delete)</li>
+                    <li>All rooms will be marked as inactive</li>
+                    <li>Property can only be deleted if there are no future bookings</li>
+                    <li>Active status will change to "Non-Active"</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end">
+            <button
+              @click="showDeleteModal = false"
+              :disabled="deletingProperty"
+              class="px-6 py-2.5 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              No, Cancel
+            </button>
+            <button
+              @click="confirmDeleteProperty"
+              :disabled="deletingProperty"
+              class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition disabled:bg-red-300 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <span v-if="deletingProperty" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+              <span>{{ deletingProperty ? 'Deleting...' : 'Yes, Delete' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -318,15 +408,19 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { propertyService } from '@/services/property.service'
+import { usePropertyStore } from '@/stores/property/property.stores'
 import type { Property, DateFilter, Room } from '@/interfaces/property.interface'
 import { PROVINCE_MAP } from '@/interfaces/property.interface'
 
 const route = useRoute()
 const router = useRouter()
+const propertyStore = usePropertyStore()
 
 const property = ref<Property | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
+const showDeleteModal = ref(false)
+const deletingProperty = ref(false)
 
 const dateFilter = ref<DateFilter>({
   checkIn: '',
@@ -424,28 +518,26 @@ const handleUpdateProperty = () => {
   router.push(`/property/${property.value?.propertyID}/edit`)
 }
 
-const handleDeleteProperty = async () => {
+const confirmDeleteProperty = async () => {
   if (!property.value) return
 
-  const confirmed = confirm(
-    `Are you sure you want to delete property "${property.value.propertyName}"?\n\nThis action cannot be undone and will delete all associated room types and rooms.`
-  )
-
-  if (!confirmed) return
-
   try {
-    loading.value = true
-    await propertyService.deleteProperty(property.value.propertyID)
-    toast.success('Property deleted successfully')
+    deletingProperty.value = true
     
+    await propertyStore.deleteProperty(property.value.propertyID)
+    
+    showDeleteModal.value = false
+    
+    // Wait a bit to show success message
     setTimeout(() => {
       router.push('/property')
-    }, 1000)
+    }, 1500)
   } catch (error: any) {
     console.error('Error deleting property:', error)
-    toast.error(error.message || 'Failed to delete property')
+    showDeleteModal.value = false
+    // Error toast already shown by store
   } finally {
-    loading.value = false
+    deletingProperty.value = false
   }
 }
 

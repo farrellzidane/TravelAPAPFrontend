@@ -119,6 +119,32 @@ export interface CreatePropertyRequest {
   }>
 }
 
+export interface UpdatePropertyRequest {
+  propertyID: string
+  propertyName: string
+  address: string
+  description: string
+  roomTypes: Array<{
+    roomTypeID: string
+    capacity: number
+    price: number
+    floor: number
+    description: string
+  }>
+}
+
+export interface UpdateRoomTypeForm {
+  roomTypeID: string
+  roomTypeName: string
+  facility: string
+  capacity: number
+  price: number
+  floor: number
+  description: string
+}
+
+// ==== helper interfaces ====
+
 export interface ApiResponse<T> {
   status: number
   message: string

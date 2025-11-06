@@ -1,4 +1,5 @@
 import type { Property, PropertyFilter, CreatePropertyRequest } from '@/interfaces/property.interface';
+import type { UpdatePropertyRequest } from '@/interfaces/property.interface'
 import type { CommonResponseInterface } from '@/interfaces/common.response.interface';
 import { defineStore } from 'pinia'
 import axios, { type AxiosResponse } from "axios";
@@ -174,15 +175,19 @@ export const usePropertyStore = defineStore('property', {
     },
 
     // Update property
-    async updateProperty(id: string, data: Partial<CreatePropertyRequest>): Promise<Property> {
+    async updateProperty(id: string, data: UpdatePropertyRequest): Promise<Property> {
       this.loading = true
       this.error = null
 
       try {
+        console.log('Updating property:', id, data)
+        
         const response: AxiosResponse<CommonResponseInterface<Property>> = 
           await axios.put(`${API_BASE_URL}/api/property/update/${id}`, data)
 
-        if (response.data.status === 200 && response.data.data) {
+        console.log('Update property response:', response.data)
+
+        if ((response.data.status === 200 || response.data.status === 201) && response.data.data) {
           // Update property in store
           const index = this.properties.findIndex(p => p.propertyID === id)
           if (index !== -1) {
@@ -191,42 +196,70 @@ export const usePropertyStore = defineStore('property', {
           
           this.currentProperty = response.data.data
           
-          toast.success('Property updated successfully!')
+          toast.success(response.data.message || 'Property updated successfully!')
           return response.data.data
         } else {
           throw new Error(response.data.message || 'Failed to update property')
         }
       } catch (error: any) {
         console.error('Error updating property:', error)
-        this.error = error.message || 'Failed to update property'
-        toast.error('Failed to update property')
+        
+        if (error.response?.data?.message) {
+          this.error = error.response.data.message
+          toast.error(error.response.data.message)
+        } else if (error.response?.data) {
+          this.error = JSON.stringify(error.response.data)
+          toast.error('Failed to update property. Please check your input.')
+        } else {
+          this.error = error.message || 'Failed to update property'
+          toast.error('Failed to update property. Please try again.')
+        }
+        
         throw error
       } finally {
         this.loading = false
       }
     },
 
-    // Delete property
-    async deleteProperty(id: string): Promise<void> {
+    // Delete property (soft delete)
+    async deleteProperty(id: string): Promise<Property> {
       this.loading = true
       this.error = null
 
       try {
-        const response: AxiosResponse<CommonResponseInterface<null>> = 
+        console.log('Soft deleting property:', id)
+        
+        const response: AxiosResponse<CommonResponseInterface<Property>> = 
           await axios.delete(`${API_BASE_URL}/api/property/delete/${id}`)
 
-        if (response.data.status === 200) {
-          // Remove property from store
-          this.properties = this.properties.filter(p => p.propertyID !== id)
+        console.log('Delete property response:', response.data)
+
+        if (response.data.status === 200 && response.data.data) {
+          // Update property status in store
+          const index = this.properties.findIndex(p => p.propertyID === id)
+          if (index !== -1) {
+            this.properties[index] = response.data.data
+          }
           
-          toast.success('Property deleted successfully!')
+          toast.success(response.data.message || 'Property successfully deactivated!')
+          return response.data.data
         } else {
           throw new Error(response.data.message || 'Failed to delete property')
         }
       } catch (error: any) {
         console.error('Error deleting property:', error)
-        this.error = error.message || 'Failed to delete property'
-        toast.error('Failed to delete property')
+        
+        if (error.response?.data?.message) {
+          this.error = error.response.data.message
+          toast.error(error.response.data.message)
+        } else if (error.response?.data) {
+          this.error = JSON.stringify(error.response.data)
+          toast.error('Failed to delete property. Please try again.')
+        } else {
+          this.error = error.message || 'Failed to delete property'
+          toast.error('Failed to delete property. Please try again.')
+        }
+        
         throw error
       } finally {
         this.loading = false
