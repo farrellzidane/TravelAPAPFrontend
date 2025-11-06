@@ -301,7 +301,7 @@
                             Book
                           </button>
                           <button
-                            @click="handleMaintenance(room.roomID)"
+                            @click="openMaintenanceModal(room)"
                             :disabled="room.availabilityStatus !== 1"
                             class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-semibold rounded-lg shadow transition disabled:bg-gray-300 disabled:cursor-not-allowed"
                           >
@@ -400,6 +400,104 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Maintenance Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showMaintenanceModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+        @click.self="closeMaintenanceModal"
+      >
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+          <!-- Modal Header -->
+          <div class="bg-yellow-500 text-white p-6">
+            <div class="flex items-center gap-3">
+              <div class="flex-shrink-0">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold">Add Maintenance</h3>
+                <p class="text-yellow-100 text-sm mt-1">
+                  Room: {{ selectedRoom?.roomID }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Body -->
+          <form @submit.prevent="handleMaintenanceSubmit" class="p-6 space-y-4">
+            <!-- Start Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Start <span class="text-red-500">*</span>
+              </label>
+              <input
+                v-model="maintenanceForm.maintenanceStart"
+                type="datetime-local"
+                required
+                :min="minDateTime"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              />
+            </div>
+
+            <!-- End Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                End <span class="text-red-500">*</span>
+              </label>
+              <input
+                v-model="maintenanceForm.maintenanceEnd"
+                type="datetime-local"
+                required
+                :min="maintenanceForm.maintenanceStart || minDateTime"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              />
+            </div>
+
+            <!-- Info -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div class="flex gap-2">
+                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-sm text-blue-800">
+                  <p class="font-semibold mb-1">Notes:</p>
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>End date must be after start date</li>
+                    <li>Cannot schedule if room has bookings</li>
+                    <li>New schedule will replace existing one</li>
+                    <li>Room will be unavailable during maintenance</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3 pt-4">
+              <button
+                type="button"
+                @click="closeMaintenanceModal"
+                :disabled="roomStore.loading"
+                class="flex-1 px-6 py-2.5 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                :disabled="roomStore.loading || !maintenanceForm.maintenanceStart || !maintenanceForm.maintenanceEnd"
+                class="flex-1 px-6 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg transition disabled:bg-yellow-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <span v-if="roomStore.loading" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                <span>{{ roomStore.loading ? 'Saving...' : 'Save' }}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -409,26 +507,45 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
-import type { Property, DateFilter, Room } from '@/interfaces/property.interface'
+import { useRoomStore } from '@/stores/room/room.stores'
+import type { Property, DateFilter, Room, MaintenanceForm, CreateMaintenanceRequest } from '@/interfaces/property.interface'
 import { PROVINCE_MAP } from '@/interfaces/property.interface'
 
 const route = useRoute()
 const router = useRouter()
 const propertyStore = usePropertyStore()
+const roomStore = useRoomStore()
 
 const property = ref<Property | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
 const showDeleteModal = ref(false)
 const deletingProperty = ref(false)
+const showMaintenanceModal = ref(false)
+const selectedRoom = ref<Room | null>(null)
 
 const dateFilter = ref<DateFilter>({
   checkIn: '',
   checkOut: ''
 })
 
+const maintenanceForm = ref<MaintenanceForm>({
+  maintenanceStart: '',
+  maintenanceEnd: ''
+})
+
 const today = computed(() => {
   return new Date().toISOString().split('T')[0]
+})
+
+const minDateTime = computed(() => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
 })
 
 const fetchPropertyDetail = async (withFilter: boolean = false) => {
@@ -497,6 +614,7 @@ const formatDate = (dateString: string): string => {
 const getStatusClass = (status: string): string => {
   const statusMap: Record<string, string> = {
     'Available': 'bg-green-100 text-green-800',
+    'Unavailable': 'bg-red-100 text-red-800',
     'Not Available': 'bg-red-100 text-red-800',
     'Maintenance': 'bg-yellow-100 text-yellow-800',
     'Booked': 'bg-blue-100 text-blue-800'
@@ -510,8 +628,7 @@ const getAvailableRoomsCount = (rooms: Room[] | null | undefined): number => {
 }
 
 const handleAddRoom = () => {
-  toast.info('Add room feature - Coming soon')
-  // router.push(`/property/${property.value?.propertyID}/add-room`)
+  router.push(`/property/${property.value?.propertyID}/add-room`)
 }
 
 const handleUpdateProperty = () => {
@@ -528,16 +645,73 @@ const confirmDeleteProperty = async () => {
     
     showDeleteModal.value = false
     
-    // Wait a bit to show success message
     setTimeout(() => {
       router.push('/property')
     }, 1500)
   } catch (error: any) {
     console.error('Error deleting property:', error)
     showDeleteModal.value = false
-    // Error toast already shown by store
   } finally {
     deletingProperty.value = false
+  }
+}
+
+const openMaintenanceModal = (room: Room) => {
+  selectedRoom.value = room
+  maintenanceForm.value = {
+    maintenanceStart: '',
+    maintenanceEnd: ''
+  }
+  showMaintenanceModal.value = true
+}
+
+const closeMaintenanceModal = () => {
+  showMaintenanceModal.value = false
+  selectedRoom.value = null
+  maintenanceForm.value = {
+    maintenanceStart: '',
+    maintenanceEnd: ''
+  }
+}
+
+const handleMaintenanceSubmit = async () => {
+  if (!selectedRoom.value) return
+
+  // Validate dates
+  const startDate = new Date(maintenanceForm.value.maintenanceStart)
+  const endDate = new Date(maintenanceForm.value.maintenanceEnd)
+
+  if (endDate <= startDate) {
+    toast.error('End date must be after start date')
+    return
+  }
+
+  const confirmed = confirm(
+    `Are you sure you want to schedule maintenance for room ${selectedRoom.value.roomID}?\n\n` +
+    `Start: ${new Date(maintenanceForm.value.maintenanceStart).toLocaleString('id-ID')}\n` +
+    `End: ${new Date(maintenanceForm.value.maintenanceEnd).toLocaleString('id-ID')}\n\n` +
+    `Note: This will replace any existing maintenance schedule and the room will be unavailable.`
+  )
+
+  if (!confirmed) return
+
+  try {
+    const requestData: CreateMaintenanceRequest = {
+      roomID: selectedRoom.value.roomID,
+      maintenanceStart: maintenanceForm.value.maintenanceStart + ':00',
+      maintenanceEnd: maintenanceForm.value.maintenanceEnd + ':00'
+    }
+
+    console.log('Submitting maintenance data:', requestData)
+
+    await roomStore.createMaintenance(requestData)
+
+    closeMaintenanceModal()
+    
+    // Refresh property details
+    await fetchPropertyDetail()
+  } catch (error: any) {
+    console.error('Error creating maintenance:', error)
   }
 }
 
@@ -548,12 +722,6 @@ const handleBook = (roomId: string) => {
   }
   
   toast.info('Book room feature - Coming soon')
-  // router.push(`/booking/create?roomId=${roomId}&checkIn=${dateFilter.value.checkIn}&checkOut=${dateFilter.value.checkOut}`)
-}
-
-const handleMaintenance = (roomId: string) => {
-  toast.info('Maintenance feature - Coming soon')
-  // router.push(`/room/${roomId}/maintenance`)
 }
 
 const goBack = () => {

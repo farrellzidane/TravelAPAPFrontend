@@ -4,6 +4,7 @@ import PropertyView from '../views/property/PropertyView.vue'
 import CreateProperty from '../views/property/CreateProperty.vue'
 import DetailProperty from '../views/property/DetailProperty.vue'
 import UpdateProperty from '../views/property/UpdateProperty.vue'
+import AddRoomType from '@/views/property/AddRoomType.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -32,7 +33,13 @@ const router = createRouter({
       path: '/property/:id/edit',
       name: 'property-update',
       component: UpdateProperty,
-    }
+    },
+
+    {
+      path: '/property/updateroom/:id',
+      name: 'property-add-room',
+      component: AddRoomType
+    },
     // {
     //   path: '/booking',
     //   name: 'booking',

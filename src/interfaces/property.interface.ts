@@ -143,6 +143,40 @@ export interface UpdateRoomTypeForm {
   description: string
 }
 
+export interface AddRoomTypeRequest {
+  propertyID: string
+  roomTypes: Array<{
+    roomTypeName: string
+    facility: string
+    capacity: number
+    price: number
+    floor: number
+    unitCount: number
+    description: string
+  }>
+}
+
+export interface AddRoomTypeForm {
+  id: string
+  roomTypeName: string
+  facility: string
+  capacity: number | null
+  price: number | null
+  floor: number | null
+  unitCount: number | null
+  description: string
+}
+
+export interface CreateMaintenanceRequest {
+  roomID: string
+  maintenanceStart: string
+  maintenanceEnd: string
+}
+
+export interface MaintenanceForm {
+  maintenanceStart: string
+  maintenanceEnd: string
+}
 // ==== helper interfaces ====
 
 export interface ApiResponse<T> {

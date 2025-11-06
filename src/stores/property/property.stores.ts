@@ -1,4 +1,4 @@
-import type { Property, PropertyFilter, CreatePropertyRequest } from '@/interfaces/property.interface';
+import type { Property, PropertyFilter, CreatePropertyRequest, AddRoomTypeRequest } from '@/interfaces/property.interface';
 import type { UpdatePropertyRequest } from '@/interfaces/property.interface'
 import type { CommonResponseInterface } from '@/interfaces/common.response.interface';
 import { defineStore } from 'pinia'
@@ -258,6 +258,53 @@ export const usePropertyStore = defineStore('property', {
         } else {
           this.error = error.message || 'Failed to delete property'
           toast.error('Failed to delete property. Please try again.')
+        }
+        
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // Add room types to property
+    async addRoomTypes(propertyId: string, data: AddRoomTypeRequest): Promise<Property> {
+      this.loading = true
+      this.error = null
+
+      try {
+        console.log('Adding room types to property:', propertyId, data)
+        
+        const response: AxiosResponse<CommonResponseInterface<Property>> = 
+          await axios.post(`${API_BASE_URL}/api/property/updateroom`, data)
+
+        console.log('Add room types response:', response.data)
+
+        if ((response.data.status === 200 || response.data.status === 201) && response.data.data) {
+          // Update property in store
+          const index = this.properties.findIndex(p => p.propertyID === propertyId)
+          if (index !== -1) {
+            this.properties[index] = response.data.data
+          }
+          
+          this.currentProperty = response.data.data
+          
+          toast.success(response.data.message || 'Room types added successfully!')
+          return response.data.data
+        } else {
+          throw new Error(response.data.message || 'Failed to add room types')
+        }
+      } catch (error: any) {
+        console.error('Error adding room types:', error)
+        
+        if (error.response?.data?.message) {
+          this.error = error.response.data.message
+          toast.error(error.response.data.message)
+        } else if (error.response?.data) {
+          this.error = JSON.stringify(error.response.data)
+          toast.error('Failed to add room types. Please check your input.')
+        } else {
+          this.error = error.message || 'Failed to add room types'
+          toast.error('Failed to add room types. Please try again.')
         }
         
         throw error

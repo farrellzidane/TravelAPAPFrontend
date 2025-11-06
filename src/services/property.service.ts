@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios'
-import type { Property, Province, CreatePropertyRequest, ApiResponse, DateFilter, UpdatePropertyRequest } from '@/interfaces/property.interface'
+import type { Property, Province, CreatePropertyRequest, ApiResponse, DateFilter, UpdatePropertyRequest, AddRoomTypeRequest } from '@/interfaces/property.interface'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 const WILAYAH_API = 'https://www.emsifa.com/api-wilayah-indonesia/api'
@@ -98,6 +98,27 @@ export const propertyService = {
       return response.data.data
     } catch (error: any) {
       console.error('Error in deleteProperty:', error)
+      
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message)
+      }
+      
+      throw error
+    }
+  },
+
+  async addRoomTypes(propertyId: string, data: AddRoomTypeRequest): Promise<Property> {
+    try {
+      console.log('Adding room types to property:', propertyId, data)
+      
+      const response: AxiosResponse<ApiResponse<Property>> = 
+        await axios.post(`${API_BASE_URL}/api/property/updateroom`, data)
+      
+      console.log('Add room types response:', response.data)
+      
+      return response.data.data
+    } catch (error: any) {
+      console.error('Error in addRoomTypes:', error)
       
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message)
