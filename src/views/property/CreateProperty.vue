@@ -99,7 +99,7 @@
                 type="text"
                 required
                 placeholder="e.g., 550e8400-e29b-41d4-a716-446655440000"
-                pattern="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -135,7 +135,8 @@
             <button
               type="button"
               @click="handleBack"
-              class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow transition duration-300"
+              :disabled="propertyStore.loading"
+              class="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Back
             </button>
@@ -159,6 +160,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import type { Province, RoomTypeForm, CreatePropertyRequest } from '@/interfaces/property.interface'
+import { PropertyTypeByName } from '@/interfaces/property.interface'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import VDynamicForm from '@/components/property/VDynamicForm.vue'
@@ -202,36 +204,90 @@ const fetchProvinces = async () => {
 }
 
 const handlePropertyTypeChange = () => {
+  // Reset room types when property type changes
   formData.value.roomTypes = [{
     id: `room-${Date.now()}`,
-    name: '',
+    roomTypeName: '',
     facility: '',
     capacity: null,
     price: null,
     floor: null,
-    unit: null,
-    description: ''
+    unitCount: null,
+    roomTypeDescription: ''
   }]
 }
 
 const validateForm = (): boolean => {
+  // Validate room types exist
   if (formData.value.roomTypes.length === 0) {
     toast.error('Please add at least one room type')
     return false
   }
 
-  const invalidRoomType = formData.value.roomTypes.find(
-    rt => !rt.name || !rt.facility || !rt.capacity || !rt.price || rt.floor === null || !rt.unit || !rt.description
-  )
-
-  if (invalidRoomType) {
-    toast.error('Please fill in all room type fields')
-    return false
+  // Validate all room types are completely filled
+  for (let i = 0; i < formData.value.roomTypes.length; i++) {
+    const rt = formData.value.roomTypes[i]
+    if (!rt) {
+      toast.error(`Room Type ${i + 1}: Room type data is missing`)
+      return false
+    }
+    
+    if (!rt.roomTypeName) {
+      toast.error(`Room Type ${i + 1}: Please select a room type name`)
+      return false
+    }
+    
+    if (!rt.facility || rt.facility.trim() === '') {
+      toast.error(`Room Type ${i + 1}: Please enter facility`)
+      return false
+    }
+    
+    if (!rt.capacity || rt.capacity <= 0) {
+      toast.error(`Room Type ${i + 1}: Please enter valid capacity`)
+      return false
+    }
+    
+    if (!rt.price || rt.price <= 0) {
+      toast.error(`Room Type ${i + 1}: Please enter valid price`)
+      return false
+    }
+    
+    if (rt.floor === null || rt.floor < 0) {
+      toast.error(`Room Type ${i + 1}: Please enter valid floor number`)
+      return false
+    }
+    
+    if (!rt.unitCount || rt.unitCount <= 0) {
+      toast.error(`Room Type ${i + 1}: Please enter valid unit count`)
+      return false
+    }
+    
+    if (!rt.roomTypeDescription || rt.roomTypeDescription.trim() === '') {
+      toast.error(`Room Type ${i + 1}: Please enter description`)
+      return false
+    }
   }
 
-  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  // Check for duplicate roomType-floor combination
+  const combinations = new Set<string>()
+  for (let i = 0; i < formData.value.roomTypes.length; i++) {
+    const rt = formData.value.roomTypes[i]
+    if (!rt) {
+      continue
+    }
+    const combo = `${rt.roomTypeName}-${rt.floor}`
+    
+    if (combinations.has(combo)) {
+      toast.error(`Duplicate combination found: ${rt.roomTypeName} on floor ${rt.floor}. Each room type must be on a different floor.`)
+      return false
+    }
+    combinations.add(combo)
+  }
+
+  // Validate UUID format
+  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
   if (!uuidPattern.test(formData.value.ownerID)) {
-    toast.error('Please enter a valid UUID for Owner ID')
+    toast.error('Please enter a valid UUID for Owner ID (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)')
     return false
   }
 
@@ -244,37 +300,60 @@ const handleSubmit = async () => {
   }
 
   try {
+    // Calculate total rooms
+    const totalRoom = formData.value.roomTypes.reduce((sum, rt) => sum + (rt.unitCount || 0), 0)
+
+    // Build request body sesuai dengan BE
     const requestData: CreatePropertyRequest = {
       propertyName: formData.value.propertyName,
-      propertyType: formData.value.propertyType,
-      province: formData.value.province,
+      type: PropertyTypeByName[formData.value.propertyType] ?? (() => { throw new Error('Invalid property type'); })(), // Convert string to number, ensure not undefined
       address: formData.value.address,
+      province: parseInt(formData.value.province), // Convert string to number
       description: formData.value.description,
-      ownerID: formData.value.ownerID,
+      totalRoom: totalRoom,
       ownerName: formData.value.ownerName,
+      ownerID: formData.value.ownerID,
       roomTypes: formData.value.roomTypes.map(rt => ({
-        name: rt.name,
-        facility: rt.facility,
+        roomTypeName: rt.roomTypeName,
+        roomTypeDescription: rt.roomTypeDescription,
         capacity: rt.capacity!,
         price: rt.price!,
-        floor: rt.floor!,
-        unit: rt.unit!,
-        description: rt.description
+        facility: rt.facility,
+        unitCount: rt.unitCount!,
+        floor: rt.floor!
       }))
     }
 
+    console.log('Submitting property data:', JSON.stringify(requestData, null, 2))
+
     await propertyStore.createProperty(requestData)
     
+    // Redirect after short delay to allow user to see success message
     setTimeout(() => {
       router.push('/property')
-    }, 1000)
+    }, 1500)
   } catch (error: any) {
     console.error('Error creating property:', error)
+    // Error toast already shown by store
   }
 }
 
 const handleBack = () => {
-  if (confirm('Are you sure you want to go back? All unsaved changes will be lost.')) {
+  const hasData = 
+    formData.value.propertyName ||
+    formData.value.propertyType ||
+    formData.value.province ||
+    formData.value.address ||
+    formData.value.description ||
+    formData.value.ownerID ||
+    formData.value.ownerName ||
+    formData.value.roomTypes.length > 0
+
+  if (hasData) {
+    if (confirm('Are you sure you want to go back? All unsaved changes will be lost.')) {
+      router.push('/property')
+    }
+  } else {
     router.push('/property')
   }
 }

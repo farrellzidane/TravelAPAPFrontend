@@ -136,14 +136,18 @@ export const usePropertyStore = defineStore('property', {
       this.error = null
 
       try {
+        console.log('Sending create property request:', data)
+        
         const response: AxiosResponse<CommonResponseInterface<Property>> = 
           await axios.post(`${API_BASE_URL}/api/property/create`, data)
 
-        if (response.data.status === 200 && response.data.data) {
+        console.log('Create property response:', response.data)
+
+        if ((response.data.status === 200 || response.data.status === 201) && response.data.data) {
           // Add new property to store
           this.properties.unshift(response.data.data)
           
-          toast.success('Property created successfully!')
+          toast.success(response.data.message || 'Property created successfully!')
           return response.data.data
         } else {
           throw new Error(response.data.message || 'Failed to create property')
@@ -155,9 +159,12 @@ export const usePropertyStore = defineStore('property', {
         if (error.response?.data?.message) {
           this.error = error.response.data.message
           toast.error(error.response.data.message)
+        } else if (error.response?.data) {
+          this.error = JSON.stringify(error.response.data)
+          toast.error('Failed to create property. Please check your input.')
         } else {
           this.error = error.message || 'Failed to create property'
-          toast.error('Failed to create property')
+          toast.error('Failed to create property. Please try again.')
         }
         
         throw error

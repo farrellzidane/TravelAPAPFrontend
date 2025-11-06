@@ -18,13 +18,17 @@ export interface Property {
 }
 
 export interface RoomType {
-  roomTypeID: string
-  name: string
-  price: number
-  description: string
-  capacity: number
-  facility: string
+  roomTypeID?: string
+  roomTypeName: string
   floor: number
+  capacity: number
+  price: number
+  facility: string
+  description: string
+  roomIDs: string[]
+  listRoom: any[] | null
+  createdDate: string | null
+  updatedDate: string | null
 }
 
 export interface PropertyFilter {
@@ -34,9 +38,21 @@ export interface PropertyFilter {
 }
 
 export enum PropertyType {
-  HOTEL = 'Hotel',
-  VILLA = 'Villa',
-  APARTMENT = 'Apartemen'
+  HOTEL = 1,
+  VILLA = 2,
+  APARTMENT = 3
+}
+
+export const PropertyTypeNames: Record<number, string> = {
+  1: 'Hotel',
+  2: 'Villa',
+  3: 'Apartemen'
+}
+
+export const PropertyTypeByName: Record<string, number> = {
+  'Hotel': 1,
+  'Villa': 2,
+  'Apartemen': 3
 }
 
 export enum PropertyStatus {
@@ -51,31 +67,33 @@ export interface Province {
 
 export interface RoomTypeForm {
   id: string
-  name: string
+  roomTypeName: string
   facility: string
   capacity: number | null
   price: number | null
   floor: number | null
-  unit: number | null
-  description: string
+  unitCount: number | null
+  roomTypeDescription: string
 }
 
+// Request sesuai dengan BE
 export interface CreatePropertyRequest {
   propertyName: string
-  propertyType: string
-  province: string
+  type: number  // 1=Hotel, 2=Villa, 3=Apartemen
   address: string
+  province: number  // province code as number
   description: string
-  ownerID: string
+  totalRoom: number  // total dari semua unitCount
   ownerName: string
+  ownerID: string
   roomTypes: Array<{
-    name: string
-    facility: string
+    roomTypeName: string
+    roomTypeDescription: string
     capacity: number
     price: number
+    facility: string
+    unitCount: number
     floor: number
-    unit: number
-    description: string
   }>
 }
 

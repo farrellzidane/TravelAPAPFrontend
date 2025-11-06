@@ -40,7 +40,7 @@
             Room Type <span class="text-red-500">*</span>
           </label>
           <select
-            v-model="roomType.name"
+            v-model="roomType.roomTypeName"
             required
             class="w-full px-4 py-2.5 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
           >
@@ -110,13 +110,13 @@
           />
         </div>
 
-        <!-- Unit -->
+        <!-- Unit Count -->
         <div>
           <label class="block text-sm font-medium text-blue-700 mb-2">
-            Unit <span class="text-red-500">*</span>
+            Unit Count <span class="text-red-500">*</span>
           </label>
           <input
-            v-model.number="roomType.unit"
+            v-model.number="roomType.unitCount"
             type="number"
             required
             min="1"
@@ -131,7 +131,7 @@
             Description <span class="text-red-500">*</span>
           </label>
           <textarea
-            v-model="roomType.description"
+            v-model="roomType.roomTypeDescription"
             required
             rows="3"
             placeholder="Enter room type description"
@@ -167,13 +167,13 @@ const roomTypeOptions = computed(() => {
 const addRoomType = () => {
   const newRoomType: RoomTypeForm = {
     id: `room-${Date.now()}-${Math.random()}`,
-    name: '',
+    roomTypeName: '',
     facility: '',
     capacity: null,
     price: null,
     floor: null,
-    unit: null,
-    description: ''
+    unitCount: null,
+    roomTypeDescription: ''
   }
   
   emit('update:modelValue', [...props.modelValue, newRoomType])
