@@ -67,11 +67,10 @@
             @click="closeMobileMenu"
             class="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition"
             active-class="bg-blue-50 text-blue-600 font-semibold"
-          >
-            Property
-          </router-link>
+          >            to="/bookings"
+       </router-link>
           <router-link
-            to="/bookings"
+            to="/booking"
             @click="closeMobileMenu"
             class="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition"
             active-class="bg-blue-50 text-blue-600 font-semibold"

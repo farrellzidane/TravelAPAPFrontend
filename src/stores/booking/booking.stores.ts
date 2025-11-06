@@ -134,17 +134,18 @@ export const useBookingStore = defineStore('booking', () => {
     }
   }
 
+
   const payBooking = async (bookingId: string): Promise<Booking> => {
     loading.value = true
     error.value = null
 
     try {
-      console.log('Paying booking:', bookingId)
+      console.log('Confirming payment for booking:', bookingId)
 
       const response: AxiosResponse<CommonResponseInterface<Booking>> = 
-        await axios.put(`${API_BASE_URL}/api/bookings/${bookingId}/payment-confirm`)
+        await axios.post(`${API_BASE_URL}/api/bookings/status/pay`, { bookingID: bookingId })
 
-      console.log('Pay booking response:', response.data)
+      console.log('Payment confirmation response:', response.data)
 
       if (response.data.status === 200 && response.data.data) {
         toast.success(response.data.message || 'Payment confirmed successfully!')
@@ -154,7 +155,7 @@ export const useBookingStore = defineStore('booking', () => {
         throw new Error(response.data.message || 'Failed to confirm payment')
       }
     } catch (err: any) {
-      console.error('Error paying booking:', err)
+      console.error('Error confirming payment:', err)
       
       if (err.response?.data?.message) {
         error.value = err.response.data.message
@@ -178,7 +179,7 @@ export const useBookingStore = defineStore('booking', () => {
       console.log('Cancelling booking:', bookingId)
 
       const response: AxiosResponse<CommonResponseInterface<Booking>> = 
-        await axios.put(`${API_BASE_URL}/api/bookings/${bookingId}/cancel`)
+        await axios.post(`${API_BASE_URL}/api/bookings/status/cancel`, { bookingID: bookingId })
 
       console.log('Cancel booking response:', response.data)
 
@@ -214,26 +215,26 @@ export const useBookingStore = defineStore('booking', () => {
       console.log('Requesting refund for booking:', bookingId)
 
       const response: AxiosResponse<CommonResponseInterface<Booking>> = 
-        await axios.put(`${API_BASE_URL}/api/bookings/${bookingId}/refund`)
+        await axios.post(`${API_BASE_URL}/api/bookings/status/refund`, { bookingID: bookingId })
 
-      console.log('Request refund response:', response.data)
+      console.log('Refund request response:', response.data)
 
       if (response.data.status === 200 && response.data.data) {
-        toast.success(response.data.message || 'Refund requested successfully!')
+        toast.success(response.data.message || 'Refund processed successfully!')
         currentBooking.value = response.data.data
         return response.data.data
       } else {
-        throw new Error(response.data.message || 'Failed to request refund')
+        throw new Error(response.data.message || 'Failed to process refund')
       }
     } catch (err: any) {
-      console.error('Error requesting refund:', err)
+      console.error('Error processing refund:', err)
       
       if (err.response?.data?.message) {
         error.value = err.response.data.message
         toast.error(err.response.data.message)
       } else {
-        error.value = 'Failed to request refund'
-        toast.error('Failed to request refund. Please try again.')
+        error.value = 'Failed to process refund'
+        toast.error('Failed to process refund. Please try again.')
       }
       
       throw err

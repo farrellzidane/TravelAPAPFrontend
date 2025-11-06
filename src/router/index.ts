@@ -9,7 +9,8 @@ import BookingView from '../views/booking/BookingView.vue'
 import BookingDetail from '@/views/booking/BookingDetail.vue'
 import CreateBookingWithRoom from '@/views/booking/CreateBookingWithRoom.vue'
 import CreateBookingWithoutRoom from '@/views/booking/CreateBookingWithoutRoom.vue'
-import UpdateBooking from '@/views/booking/UpdateBooking.vue'
+import UpdateBooking from '../views/booking/UpdateBooking.vue'
+import ChartView from '../views/statistics/ChartView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -71,12 +72,12 @@ const router = createRouter({
       path: '/bookings/create',
       name: 'booking-create',
       component: CreateBookingWithoutRoom,
+    },
+    {
+      path: '/statistic',
+      name: 'statistic',
+      component: ChartView,
     }
-    // {
-    //   path: '/statistic',
-    //   name: 'statistic',
-    //   component: () => import('../views/StatisticView.vue'),
-    // },
     // {
     //   path: '/about',
     //   name: 'about',

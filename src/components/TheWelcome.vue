@@ -19,7 +19,16 @@
             Platform Statistics
           </h2>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Loading State -->
+          <div v-if="isLoading" class="flex justify-center items-center py-12">
+            <div class="text-center">
+              <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600"></div>
+              <p class="mt-4 text-gray-600">Loading statistics...</p>
+            </div>
+          </div>
+
+          <!-- Statistics Cards -->
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Total Properties Card -->
             <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
               <div class="flex items-center justify-between">
@@ -69,10 +78,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useToast } from 'vue-toastification'
+import { toast } from 'vue-sonner'
+import axios from 'axios'
+import type { CommonResponseInterface } from '@/interfaces/common.response.interface'
 
 const router = useRouter()
-const toast = useToast()
 
 interface Statistics {
   totalProperties: number
@@ -84,19 +94,39 @@ const statistics = ref<Statistics>({
   totalBookings: 0
 })
 
+const isLoading = ref(false)
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+
 const fetchStatistics = async () => {
+  isLoading.value = true
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/statistics`)
+    // Fetch total properties
+    const propertiesResponse = await axios.get<CommonResponseInterface<any[]>>(
+      `${API_BASE_URL}/api/property`
+    )
     
-    if (!response.ok) {
-      throw new Error('Failed to fetch statistics')
+    // Fetch total bookings
+    const bookingsResponse = await axios.get<CommonResponseInterface<any[]>>(
+      `${API_BASE_URL}/api/bookings`
+    )
+    
+    statistics.value = {
+      totalProperties: propertiesResponse.data.data?.length || 0,
+      totalBookings: bookingsResponse.data.data?.length || 0
     }
     
-    const data = await response.json()
-    statistics.value = data
+    console.log('Statistics loaded:', statistics.value)
   } catch (error) {
     console.error('Error fetching statistics:', error)
-    toast.error('Failed to load statistics')
+    toast.error('Failed to load statistics. Please try again.')
+    // Set default values on error
+    statistics.value = {
+      totalProperties: 0,
+      totalBookings: 0
+    }
+  } finally {
+    isLoading.value = false
   }
 }
 

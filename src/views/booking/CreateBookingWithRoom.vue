@@ -308,7 +308,7 @@ const handleSubmit = async () => {
 
     // Redirect to booking detail page or bookings list
     setTimeout(() => {
-      router.push(`/booking/${result.bookingID}`)
+      router.push(`/bookings/${result.bookingID}`)
     }, 1500)
 
   } catch (error: any) {

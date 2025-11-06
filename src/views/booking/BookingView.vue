@@ -22,9 +22,9 @@
                 <option value="all">All Status</option>
                 <option value="0">Waiting for Payment</option>
                 <option value="1">Payment Confirmed</option>
-                <option value="2">Done</option>
+                <option value="2">Cancelled</option>
                 <option value="3">Request Refund</option>
-                <option value="4">Cancelled</option>
+                <option value="4">Done</option>
               </select>
             </div>
 
