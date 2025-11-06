@@ -721,7 +721,21 @@ const handleBook = (roomId: string) => {
     return
   }
   
-  toast.info('Book room feature - Coming soon')
+  // Extract room number from roomId (e.g., "HOT-0000-001-102" -> "102")
+  const roomNumber = roomId.split('-').pop() || ''
+  
+  // Navigate to create booking page with room info and dates
+  router.push({
+    name: 'booking-create-with-room',
+    params: {
+      idRoom: roomId
+    },
+    query: {
+      checkIn: dateFilter.value.checkIn,
+      checkOut: dateFilter.value.checkOut,
+      roomNumber: roomNumber
+    }
+  })
 }
 
 const goBack = () => {

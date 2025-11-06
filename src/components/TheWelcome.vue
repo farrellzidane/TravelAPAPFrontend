@@ -105,7 +105,7 @@ const goToProperties = () => {
 }
 
 const goToBookings = () => {
-  router.push('/booking')
+  router.push('/bookings')
 }
 
 onMounted(() => {

@@ -256,11 +256,11 @@ const formatDateTime = (dateString: string): string => {
 }
 
 const goToCreateBooking = () => {
-  router.push('/booking/create')
+  router.push('/bookings/create')
 }
 
 const goToBookingDetail = (bookingId: string) => {
-  router.push(`/booking/${bookingId}`)
+  router.push(`/bookings/${bookingId}`)
 }
 
 onMounted(() => {
