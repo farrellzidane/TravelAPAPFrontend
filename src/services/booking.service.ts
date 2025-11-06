@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios'
-import type { Booking, CreateBookingRequest, BookingFilter, CreateBookingWithoutRoomRequest } from '@/interfaces/booking.interface'
+import type { Booking, CreateBookingRequest, BookingFilter, CreateBookingWithoutRoomRequest, UpdateBookingRequest } from '@/interfaces/booking.interface'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
@@ -80,6 +80,27 @@ export const bookingService = {
       return response.data.data
     } catch (error: any) {
       console.error('Error in createBooking:', error)
+      
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message)
+      }
+      
+      throw error
+    }
+  },
+
+  async updateBooking(data: UpdateBookingRequest): Promise<Booking> {
+    try {
+      console.log('Updating booking:', data)
+      
+      const response: AxiosResponse<ApiResponse<Booking>> = 
+        await axios.put(`${API_BASE_URL}/api/bookings/update`, data)
+      
+      console.log('Update booking response:', response.data)
+      
+      return response.data.data
+    } catch (error: any) {
+      console.error('Error in updateBooking:', error)
       
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message)

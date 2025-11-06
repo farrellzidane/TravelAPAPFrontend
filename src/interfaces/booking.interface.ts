@@ -1,5 +1,8 @@
 export interface Booking {
   bookingID: string
+  roomID?: string
+  propertyID?: string
+  roomTypeID?: string
   propertyName?: string
   roomName?: string
   roomNumber: string
@@ -39,6 +42,21 @@ export interface CreateBookingRequest {
 }
 
 export interface CreateBookingWithoutRoomRequest {
+  propertyID: string
+  roomTypeID: string
+  roomID: string
+  checkInDate: string
+  checkOutDate: string
+  customerID: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  isBreakfast: boolean
+  capacity: number
+}
+
+export interface UpdateBookingRequest {
+  bookingID: string
   propertyID: string
   roomTypeID: string
   roomID: string

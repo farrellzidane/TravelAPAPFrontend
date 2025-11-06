@@ -9,6 +9,7 @@ import BookingView from '../views/booking/BookingView.vue'
 import BookingDetail from '@/views/booking/BookingDetail.vue'
 import CreateBookingWithRoom from '@/views/booking/CreateBookingWithRoom.vue'
 import CreateBookingWithoutRoom from '@/views/booking/CreateBookingWithoutRoom.vue'
+import UpdateBooking from '@/views/booking/UpdateBooking.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -55,6 +56,11 @@ const router = createRouter({
       path: '/bookings/:id',
       name: 'booking-detail',
       component: BookingDetail,
+    },
+    {
+      path: '/booking/:id/edit',
+      name: 'booking-update',
+      component: UpdateBooking,
     },
     {
       path: '/bookings/create/:idRoom',
