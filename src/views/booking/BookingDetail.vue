@@ -212,7 +212,7 @@
         </div>
 
         <!-- Cancelled Booking Info -->
-        <div v-if="booking.status === 4" class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 mb-6">
+        <div v-if="booking.status === 3" class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 mb-6">
           <div class="flex items-center gap-4">
             <div class="bg-red-100 rounded-full p-3">
               <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,6 +223,23 @@
               <h3 class="text-lg font-semibold text-red-900">Booking Cancelled</h3>
               <p class="text-sm text-red-700">
                 This booking has been cancelled. No further actions can be performed.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Completed Booking Info -->
+        <div v-if="booking.status === 4" class="bg-green-50 border-2 border-green-200 rounded-2xl p-6 mb-6">
+          <div class="flex items-center gap-4">
+            <div class="bg-green-100 rounded-full p-3">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-green-900">Booking Completed</h3>
+              <p class="text-sm text-green-700">
+                This booking has been completed. No further actions can be performed.
               </p>
             </div>
           </div>

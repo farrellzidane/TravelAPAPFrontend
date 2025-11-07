@@ -22,9 +22,9 @@
                 <option value="all">All Status</option>
                 <option value="0">Waiting for Payment</option>
                 <option value="1">Payment Confirmed</option>
-                <option value="2">Cancelled</option>
-                <option value="3">Request Refund</option>
-                <option value="4">Done</option>
+                <option value="2">Checked-In</option>
+                <option value="3">Cancelled / Request Refund</option>
+                <option value="4">Completed</option>
               </select>
             </div>
 
@@ -154,7 +154,7 @@
                       bookingStore.getStatusClass(booking.status.toString())
                     ]"
                   >
-                    {{ getStatusName(booking.status) }}
+                    {{ getStatusName(booking.status, booking.refund) }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -232,13 +232,17 @@ const applyFilter = () => {
   loadBookings()
 }
 
-const getStatusName = (status: number): string => {
+const getStatusName = (status: number, refund?: number): string => {
+  // Status 3 can be either "Cancelled" or "Request Refund" based on refund amount
+  if (status === 3) {
+    return refund && refund > 0 ? 'Request Refund' : 'Cancelled'
+  }
+  
   const statusMap: { [key: number]: string } = {
     0: 'Waiting for Payment',
     1: 'Payment Confirmed',
-    2: 'Done',
-    3: 'Request Refund',
-    4: 'Cancelled'
+    2: 'Checked-In',
+    4: 'Completed'
   }
   return statusMap[status] || 'Unknown'
 }
