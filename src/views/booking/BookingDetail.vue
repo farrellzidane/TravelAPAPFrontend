@@ -257,7 +257,10 @@
               <div>
                 <h3 class="text-lg font-semibold text-orange-900">Extra Payment Required</h3>
                 <p class="text-sm text-orange-700">
-                  Please complete payment of <span class="font-bold">Rp {{ booking.extraPay.toLocaleString('id-ID') }}</span>
+                  Total amount to pay: <span class="font-bold">Rp {{ (booking.totalPrice + booking.extraPay).toLocaleString('id-ID') }}</span>
+                </p>
+                <p class="text-xs text-orange-600 mt-1">
+                  (Base Price: Rp {{ booking.totalPrice.toLocaleString('id-ID') }} + Extra: Rp {{ booking.extraPay.toLocaleString('id-ID') }})
                 </p>
               </div>
             </div>
@@ -440,8 +443,11 @@
                 <div class="space-y-1">
                   <p>Booking ID: <span class="font-semibold">{{ booking?.bookingID }}</span></p>
                   <p class="text-lg font-bold text-green-700">
-                    Amount: Rp {{ ((booking?.extraPay && booking?.extraPay > 0 ? booking?.extraPay : booking?.totalPrice) || 0).toLocaleString('id-ID') }}
+                    Amount: Rp {{ getPaymentAmount().toLocaleString('id-ID') }}
                   </p>
+                  <div v-if="booking?.status === 0 && booking?.extraPay > 0" class="text-xs text-gray-600 mt-1">
+                    (Base Price: Rp {{ booking.totalPrice.toLocaleString('id-ID') }} + Extra: Rp {{ booking.extraPay.toLocaleString('id-ID') }})
+                  </div>
                 </div>
               </div>
             </div>
@@ -597,6 +603,27 @@ const formatDateTime = (dateString: string): string => {
     minute: '2-digit',
     second: '2-digit'
   })
+}
+
+const getPaymentAmount = (): number => {
+  if (!booking.value) return 0
+  
+  // Status 0 with extraPay: Pay totalPrice + extraPay
+  if (booking.value.status === 0 && booking.value.extraPay > 0) {
+    return booking.value.totalPrice + booking.value.extraPay
+  }
+  
+  // Status 0 without extraPay: Pay totalPrice
+  if (booking.value.status === 0) {
+    return booking.value.totalPrice
+  }
+  
+  // Other status with extraPay: Pay extraPay only
+  if (booking.value.extraPay > 0) {
+    return booking.value.extraPay
+  }
+  
+  return 0
 }
 
 const handlePay = async () => {
