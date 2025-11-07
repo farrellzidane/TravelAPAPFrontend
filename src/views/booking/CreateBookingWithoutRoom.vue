@@ -385,11 +385,26 @@ const onRoomTypeChange = () => {
     const roomType = availableRoomTypes.value.find(rt => rt.roomTypeID === formData.value.roomTypeID)
     
     if (roomType && roomType.listRoom && roomType.listRoom.length > 0) {
-      // Only show available rooms (availabilityStatus === 1)
-      availableRooms.value = roomType.listRoom.filter(room => room.availabilityStatus === 1)
+      // Filter rooms: available status AND no maintenance conflict with booking dates
+      availableRooms.value = roomType.listRoom.filter(room => {
+        // First check availability status
+        if (room.availabilityStatus !== 1) return false
+        
+        // Then check for maintenance overlap with booking dates
+        if (formData.value.checkInDate && formData.value.checkOutDate) {
+          return !isRoomMaintenanceDuringBooking(
+            room, 
+            formData.value.checkInDate, 
+            formData.value.checkOutDate
+          )
+        }
+        
+        // If no dates selected yet, show all available rooms
+        return true
+      })
       
       if (availableRooms.value.length === 0) {
-        toast.warning('No available rooms for this room type')
+        toast.warning('No available rooms for this room type during selected dates')
       }
     } else {
       toast.warning('No rooms available for this room type')
@@ -400,6 +415,23 @@ const onRoomTypeChange = () => {
   } finally {
     loadingRooms.value = false
   }
+}
+
+// Helper function to check if room has maintenance during booking dates
+const isRoomMaintenanceDuringBooking = (room: Room, checkInDate: string, checkOutDate: string): boolean => {
+  // If no maintenance scheduled, room is available
+  if (!room.maintenanceStart || !room.maintenanceEnd) {
+    return false
+  }
+  
+  const bookingStart = new Date(checkInDate + 'T14:00:00')
+  const bookingEnd = new Date(checkOutDate + 'T12:00:00')
+  const maintenanceStart = new Date(room.maintenanceStart)
+  const maintenanceEnd = new Date(room.maintenanceEnd)
+  
+  // Check if booking period overlaps with maintenance period
+  // Overlap occurs if: bookingStart < maintenanceEnd AND bookingEnd > maintenanceStart
+  return bookingStart < maintenanceEnd && bookingEnd > maintenanceStart
 }
 
 // When room changes, update capacity if needed
@@ -419,6 +451,14 @@ watch(() => formData.value.capacity, (newCapacity) => {
   if (maxCapacity.value && newCapacity > maxCapacity.value) {
     toast.error(`Capacity cannot exceed ${maxCapacity.value}`)
     formData.value.capacity = maxCapacity.value
+  }
+})
+
+// Watch for check-in/check-out date changes to re-filter rooms
+watch(() => [formData.value.checkInDate, formData.value.checkOutDate], () => {
+  // If both dates are selected and a room type is selected, refresh room list
+  if (formData.value.checkInDate && formData.value.checkOutDate && formData.value.roomTypeID) {
+    onRoomTypeChange()
   }
 })
 

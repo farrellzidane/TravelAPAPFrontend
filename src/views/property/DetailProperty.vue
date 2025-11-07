@@ -285,17 +285,17 @@
                         <span
                           :class="[
                             'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full',
-                            getStatusClass(room.availabilityStatusName)
+                            getStatusClass(getRoomDisplayStatus(room).name)
                           ]"
                         >
-                          {{ room.availabilityStatusName }}
+                          {{ getRoomDisplayStatus(room).name }}
                         </span>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-center">
                         <div class="flex gap-2 justify-center">
                           <button
                             @click="handleBook(room.roomID)"
-                            :disabled="room.availabilityStatus !== 1"
+                            :disabled="getRoomDisplayStatus(room).status !== 1"
                             class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition disabled:bg-gray-300 disabled:cursor-not-allowed"
                           >
                             Book
@@ -625,7 +625,61 @@ const getStatusClass = (status: string): string => {
 
 const getAvailableRoomsCount = (rooms: Room[] | null | undefined): number => {
   if (!rooms) return 0
+  
+  // If date filter is applied, check both availability status and maintenance overlap
+  if (dateFilter.value.checkIn && dateFilter.value.checkOut) {
+    return rooms.filter(room => {
+      if (room.availabilityStatus !== 1) return false
+      return !isRoomUnavailableDuringDates(room, dateFilter.value.checkIn, dateFilter.value.checkOut)
+    }).length
+  }
+  
+  // No date filter, just count rooms with status 1
   return rooms.filter(room => room.availabilityStatus === 1).length
+}
+
+// Helper function to check if room has maintenance during booking dates
+const isRoomUnavailableDuringDates = (room: Room, checkIn: string, checkOut: string): boolean => {
+  // If no maintenance scheduled, room is available
+  if (!room.maintenanceStart || !room.maintenanceEnd) {
+    return false
+  }
+  
+  const bookingStart = new Date(checkIn + 'T14:00:00')
+  const bookingEnd = new Date(checkOut + 'T12:00:00')
+  const maintenanceStart = new Date(room.maintenanceStart)
+  const maintenanceEnd = new Date(room.maintenanceEnd)
+  
+  // Check if booking period overlaps with maintenance period
+  // Overlap occurs if: bookingStart < maintenanceEnd AND bookingEnd > maintenanceStart
+  return bookingStart < maintenanceEnd && bookingEnd > maintenanceStart
+}
+
+// Get display status for a room considering date filter and maintenance
+const getRoomDisplayStatus = (room: Room): { name: string, status: number } => {
+  // If room is already marked as unavailable (status 0), show that
+  if (room.availabilityStatus !== 1) {
+    return {
+      name: 'Unavailable',
+      status: 0
+    }
+  }
+  
+  // If date filter is applied, check for maintenance overlap
+  if (dateFilter.value.checkIn && dateFilter.value.checkOut) {
+    if (isRoomUnavailableDuringDates(room, dateFilter.value.checkIn, dateFilter.value.checkOut)) {
+      return {
+        name: 'Unavailable (Maintenance)',
+        status: 0
+      }
+    }
+  }
+  
+  // Room is available
+  return {
+    name: 'Available',
+    status: 1
+  }
 }
 
 const handleAddRoom = () => {
@@ -691,7 +745,8 @@ const handleMaintenanceSubmit = async () => {
     `Are you sure you want to schedule maintenance for room ${selectedRoom.value.roomID}?\n\n` +
     `Start: ${new Date(maintenanceForm.value.maintenanceStart).toLocaleString('id-ID')}\n` +
     `End: ${new Date(maintenanceForm.value.maintenanceEnd).toLocaleString('id-ID')}\n\n` +
-    `Note: This will replace any existing maintenance schedule and the room will be unavailable.`
+    `Note: This will replace any existing maintenance schedule.\n` +
+    `The room will be unavailable for booking during the maintenance period only.`
   )
 
   if (!confirmed) return
