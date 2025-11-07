@@ -1,5 +1,6 @@
 import axios, { type AxiosResponse } from 'axios'
-import type { Property, Province, CreatePropertyRequest, ApiResponse, DateFilter, UpdatePropertyRequest, AddRoomTypeRequest } from '@/interfaces/property.interface'
+import type { Property, Province, CreatePropertyRequest, ApiResponse, DateFilter, UpdatePropertyRequest } from '@/interfaces/property.interface'
+import type { AddRoomTypeRequest } from '@/interfaces/room.interface'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 const WILAYAH_API = 'https://www.emsifa.com/api-wilayah-indonesia/api'

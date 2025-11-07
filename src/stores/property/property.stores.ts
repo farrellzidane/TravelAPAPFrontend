@@ -1,5 +1,5 @@
-import type { Property, PropertyFilter, CreatePropertyRequest, AddRoomTypeRequest } from '@/interfaces/property.interface';
-import type { UpdatePropertyRequest } from '@/interfaces/property.interface'
+import type { Property, PropertyFilter, CreatePropertyRequest, UpdatePropertyRequest } from '@/interfaces/property.interface'
+import type { AddRoomTypeRequest } from '@/interfaces/room.interface'
 import type { CommonResponseInterface } from '@/interfaces/common.response.interface';
 import { defineStore } from 'pinia'
 import axios, { type AxiosResponse } from "axios";

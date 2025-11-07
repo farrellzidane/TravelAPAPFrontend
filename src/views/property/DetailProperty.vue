@@ -508,7 +508,8 @@ import { toast } from 'vue-sonner'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import { useRoomStore } from '@/stores/room/room.stores'
-import type { Property, DateFilter, Room, MaintenanceForm, CreateMaintenanceRequest } from '@/interfaces/property.interface'
+import type { Property, DateFilter } from '@/interfaces/property.interface'
+import type { Room, MaintenanceForm, CreateMaintenanceRequest } from '@/interfaces/room.interface'
 import { PROVINCE_MAP } from '@/interfaces/property.interface'
 
 const route = useRoute()

@@ -238,7 +238,8 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import type { Property, UpdateRoomTypeForm, UpdatePropertyRequest } from '@/interfaces/property.interface'
+import type { Property, UpdatePropertyRequest } from '@/interfaces/property.interface'
+import type { UpdateRoomTypeForm } from '@/interfaces/room.interface'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 

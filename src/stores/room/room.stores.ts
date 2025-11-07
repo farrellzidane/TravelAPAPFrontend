@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios, { type AxiosResponse } from 'axios'
 import { toast } from 'vue-sonner'
-import type { Room, CreateMaintenanceRequest } from '@/interfaces/property.interface'
+import type { Room, CreateMaintenanceRequest } from '@/interfaces/room.interface'
 import type { CommonResponseInterface } from '@/interfaces/common.response.interface'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'

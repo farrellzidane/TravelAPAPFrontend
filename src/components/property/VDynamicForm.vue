@@ -145,8 +145,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { RoomTypeForm } from '@/interfaces/property.interface'
-import { ROOM_TYPE_OPTIONS } from '@/interfaces/property.interface'
+import type { RoomTypeForm } from '@/interfaces/room.interface'
+import { ROOM_TYPE_OPTIONS } from '@/interfaces/room.interface'
 
 interface Props {
   modelValue: RoomTypeForm[]

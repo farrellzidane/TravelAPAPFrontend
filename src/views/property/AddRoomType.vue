@@ -239,8 +239,9 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import type { Property, AddRoomTypeForm, AddRoomTypeRequest } from '@/interfaces/property.interface'
-import { ROOM_TYPE_OPTIONS } from '@/interfaces/property.interface'
+import type { Property } from '@/interfaces/property.interface'
+import type { AddRoomTypeForm, AddRoomTypeRequest } from '@/interfaces/room.interface'
+import { ROOM_TYPE_OPTIONS } from '@/interfaces/room.interface'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 
@@ -416,7 +417,7 @@ const handleSubmit = async () => {
         capacity: rt.capacity!,
         price: rt.price!,
         floor: rt.floor!,
-        unitCount: rt.unitCount!,  // Changed to numberOfUnits
+        numberOfUnits: rt.unitCount!,  // Changed to numberOfUnits
         description: rt.description
       }))
     }

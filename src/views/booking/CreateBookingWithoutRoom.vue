@@ -249,7 +249,8 @@ import { toast } from 'vue-sonner'
 import { bookingService } from '@/services/booking.service'
 import { propertyService } from '@/services/property.service'
 import type { CreateBookingWithoutRoomRequest } from '@/interfaces/booking.interface'
-import type { Property, RoomType, Room } from '@/interfaces/property.interface'
+import type { Property } from '@/interfaces/property.interface'
+import type { RoomType, Room } from '@/interfaces/room.interface'
 
 const router = useRouter()
 

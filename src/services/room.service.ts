@@ -1,6 +1,5 @@
 import axios, { type AxiosResponse } from 'axios'
-import type { Room } from '@/interfaces/property.interface'
-import type { CreateMaintenanceRequest } from '@/interfaces/property.interface'
+import type { Room, CreateMaintenanceRequest } from '@/interfaces/room.interface'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
