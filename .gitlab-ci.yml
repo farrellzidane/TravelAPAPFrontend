@@ -4,7 +4,7 @@ stages:
   - deploy
 
 variables:
-  DOCKER_IMAGE_NAME: farrellzidanee/accomodation-2306275600-fe
+  DOCKER_IMAGE_NAME: farrellzidanee/accommodation-2306275600-fe
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
 
 build:

@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: accomodation-2306275600-fe
+  name: accommodation-2306275600-fe
   labels:
-    app: accomodation-2306275600-fe
+    app: accommodation-2306275600-fe
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: accomodation-2306275600-fe
+      app: accommodation-2306275600-fe
   template:
     metadata:
       labels:
-        app: accomodation-2306275600-fe
+        app: accommodation-2306275600-fe
     spec:
       containers:
-        - name: accomodation-2306275600-fe
-          image: farrellzidanee/accomodation-2306275600-fe:REPLACE_ME_TAG
+        - name: accommodation-2306275600-fe
+          image: farrellzidanee/accommodation-2306275600-fe:REPLACE_ME_TAG
           ports:
             - containerPort: 80
           resources:
