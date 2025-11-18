@@ -6,7 +6,7 @@ import axios, { type AxiosResponse } from "axios";
 import { toast } from 'vue-sonner';
 import { useRouter } from 'vue-router';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 interface PropertyState {
   properties: Property[]

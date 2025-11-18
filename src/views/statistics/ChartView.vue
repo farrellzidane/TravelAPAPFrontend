@@ -177,7 +177,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const router = useRouter()
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
 // Get current month and year
 const now = new Date()
