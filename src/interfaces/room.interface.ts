@@ -61,7 +61,7 @@ export interface AddRoomTypeRequest {
     capacity: number
     price: number
     floor: number
-    numberOfUnits: number
+    unitCount: number
     description: string
   }>
 }

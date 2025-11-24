@@ -417,7 +417,7 @@ const handleSubmit = async () => {
         capacity: rt.capacity!,
         price: rt.price!,
         floor: rt.floor!,
-        numberOfUnits: rt.unitCount!,  // Changed to numberOfUnits
+        unitCount: rt.unitCount!,
         description: rt.description
       }))
     }
