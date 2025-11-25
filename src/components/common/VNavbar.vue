@@ -27,6 +27,20 @@
             Bookings
           </router-link>
           <router-link
+            to="/topup"
+            class="text-gray-700 hover:text-blue-600 font-medium transition"
+            active-class="text-blue-600 font-semibold"
+          >
+            Top-Up
+          </router-link>
+          <router-link
+            to="/payment-method"
+            class="text-gray-700 hover:text-blue-600 font-medium transition"
+            active-class="text-blue-600 font-semibold"
+          >
+            Payment Method
+          </router-link>
+          <router-link
             to="/statistic"
             class="text-gray-700 hover:text-blue-600 font-medium transition"
             active-class="text-blue-600 font-semibold"
@@ -67,15 +81,32 @@
             @click="closeMobileMenu"
             class="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition"
             active-class="bg-blue-50 text-blue-600 font-semibold"
-          >            to="/bookings"
-       </router-link>
+          >
+            Property
+          </router-link>
           <router-link
-            to="/booking"
+            to="/bookings"
             @click="closeMobileMenu"
             class="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition"
             active-class="bg-blue-50 text-blue-600 font-semibold"
           >
             Bookings
+          </router-link>
+          <router-link
+            to="/topup"
+            @click="closeMobileMenu"
+            class="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition"
+            active-class="bg-blue-50 text-blue-600 font-semibold"
+          >
+            Top-Up
+          </router-link>
+          <router-link
+            to="/payment-method"
+            @click="closeMobileMenu"
+            class="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition"
+            active-class="bg-blue-50 text-blue-600 font-semibold"
+          >
+            Payment Method
           </router-link>
           <router-link
             to="/statistic"

@@ -11,6 +11,11 @@ import CreateBookingWithRoom from '@/views/booking/CreateBookingWithRoom.vue'
 import CreateBookingWithoutRoom from '@/views/booking/CreateBookingWithoutRoom.vue'
 import UpdateBooking from '../views/booking/UpdateBooking.vue'
 import ChartView from '../views/statistics/ChartView.vue'
+import TopUpView from '../views/topup/TopUpView.vue'
+import CreateTopUp from '../views/topup/CreateTopUp.vue'
+import TopUpDetail from '../views/topup/TopUpDetail.vue'
+import PaymentMethodView from '../views/paymentmethod/PaymentMethodView.vue'
+import CreatePaymentMethod from '../views/paymentmethod/CreatePaymentMethod.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -77,6 +82,31 @@ const router = createRouter({
       path: '/statistic',
       name: 'statistic',
       component: ChartView,
+    },
+    {
+      path: '/topup',
+      name: 'topup',
+      component: TopUpView,
+    },
+    {
+      path: '/topup/create',
+      name: 'create-topup',
+      component: CreateTopUp,
+    },
+    {
+      path: '/topup/:id',
+      name: 'topup-detail',
+      component: TopUpDetail,
+    },
+    {
+      path: '/payment-method',
+      name: 'payment-method',
+      component: PaymentMethodView,
+    },
+    {
+      path: '/payment-method/create',
+      name: 'create-payment-method',
+      component: CreatePaymentMethod,
     }
     // {
     //   path: '/about',

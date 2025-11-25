@@ -1,4 +1,5 @@
 import './assets/main.css'
+import './config/axios.config' // Import axios config to setup interceptors
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
