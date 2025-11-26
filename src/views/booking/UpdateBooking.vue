@@ -576,7 +576,8 @@ const handleSubmit = async () => {
 
     const result = await bookingService.updateBooking(requestData)
 
-    toast.success(`Booking successfully updated! ${result.extraPay > 0 ? `Additional payment required: Rp ${result.extraPay.toLocaleString('id-ID')}` : ''}`)
+    // Removed: extraPay notification as feature removed
+    toast.success('Booking successfully updated!')
 
     // Redirect to booking detail page
     setTimeout(() => {

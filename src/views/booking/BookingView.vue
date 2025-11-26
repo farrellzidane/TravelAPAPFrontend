@@ -22,9 +22,7 @@
                 <option value="all">All Status</option>
                 <option value="0">Waiting for Payment</option>
                 <option value="1">Payment Confirmed</option>
-                <option value="2">Checked-In</option>
-                <option value="3">Cancelled / Request Refund</option>
-                <option value="4">Completed</option>
+                <option value="2">Cancelled</option>
               </select>
             </div>
 
@@ -152,16 +150,13 @@
                   :class="[
                     'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full',
                     {
-                    'bg-yellow-100 text-yellow-800': booking.status === 0 && (!booking.refund || booking.refund === 0), // Waiting for Payment
-                    'bg-orange-100 text-orange-800': booking.refund && booking.refund > 0, // Request Refund (any status)
-                    'bg-green-100 text-green-800': booking.status === 1 && (!booking.refund || booking.refund === 0), // Payment Confirmed
-                    'bg-blue-100 text-blue-800': booking.status === 2, // Checked-In
-                    'bg-red-100 text-red-800': booking.status === 3 && (!booking.refund || booking.refund === 0), // Cancelled
-                    'bg-gray-100 text-gray-800': booking.status === 4 // Done/Completed
+                    'bg-yellow-100 text-yellow-800': booking.status === 0, // Waiting for Payment
+                    'bg-green-100 text-green-800': booking.status === 1, // Payment Confirmed
+                    'bg-red-100 text-red-800': booking.status === 2 // Cancelled
                     }
                   ]"
                   >
-                  {{ getStatusName(booking.status, booking.refund) }}
+                  {{ getStatusName(booking.status) }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -239,19 +234,11 @@ const applyFilter = () => {
   loadBookings()
 }
 
-const getStatusName = (status: number, refund?: number): string => {
-  // ✅ Show "Request Refund" if there's a refund > 0 regardless of status
-  if (refund && refund > 0) {
-    return 'Request Refund'
-  }
-  
-  // Regular status mapping
+const getStatusName = (status: number): string => {
   const statusMap: { [key: number]: string } = {
     0: 'Waiting for Payment',
     1: 'Payment Confirmed',
-    2: 'Checked-In',
-    3: 'Cancelled',
-    4: 'Done'
+    2: 'Cancelled'
   }
   return statusMap[status] || 'Unknown'
 }

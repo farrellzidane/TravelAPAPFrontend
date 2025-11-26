@@ -54,6 +54,8 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-2">
+              <!-- Removed: Refund button as refund feature removed -->
+              <!--
               <button
                 v-if="booking.canRefund && booking.status !== 4"
                 @click="handleRefund"
@@ -62,8 +64,9 @@
               >
                 Refund
               </button>
+              -->
               <button
-                v-if="booking.canCancel && booking.status !== 4"
+                v-if="booking.canCancel && booking.status !== 2"
                 @click="showCancelModal = true"
                 :disabled="processingAction"
                 class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow transition disabled:bg-red-300 disabled:cursor-not-allowed"
@@ -179,6 +182,8 @@
                     Rp {{ booking.totalPrice.toLocaleString('id-ID') }}
                   </span>
                 </div>
+                <!-- Removed: extraPay and refund display as features removed -->
+                <!--
                 <div v-if="booking.extraPay > 0" class="flex justify-between items-center pt-2 border-t border-green-200">
                   <span class="text-sm font-medium text-orange-700">Extra Payment</span>
                   <span class="text-lg font-bold text-orange-600">
@@ -191,6 +196,7 @@
                     Rp {{ booking.refund.toLocaleString('id-ID') }}
                   </span>
                 </div>
+                -->
               </div>
             </div>
 
@@ -212,7 +218,7 @@
         </div>
 
         <!-- Cancelled Booking Info -->
-        <div v-if="booking.status === 3" class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 mb-6">
+        <div v-if="booking.status === 2" class="bg-red-50 border-2 border-red-200 rounded-2xl p-6 mb-6">
           <div class="flex items-center gap-4">
             <div class="bg-red-100 rounded-full p-3">
               <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,7 +234,8 @@
           </div>
         </div>
 
-        <!-- Completed Booking Info -->
+        <!-- Removed: Completed Booking Info (status 4 removed) -->
+        <!--
         <div v-if="booking.status === 4" class="bg-green-50 border-2 border-green-200 rounded-2xl p-6 mb-6">
           <div class="flex items-center gap-4">
             <div class="bg-green-100 rounded-full p-3">
@@ -244,8 +251,10 @@
             </div>
           </div>
         </div>
+        -->
 
-        <!-- Pay Button (if extra pay) -->
+        <!-- Removed: Pay Button for extra pay (feature removed) -->
+        <!--
         <div v-if="booking.canPay && booking.extraPay > 0 && booking.status !== 4" class="bg-orange-50 border-2 border-orange-200 rounded-2xl p-6 mb-6">
           <div class="flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-4">
@@ -277,9 +286,10 @@
             </button>
           </div>
         </div>
+        -->
 
         <!-- Pay Button (if waiting for payment) -->
-        <div v-else-if="booking.canPay && booking.status === 0" class="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-6 mb-6">
+        <div v-if="booking.canPay && booking.status === 0" class="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-6 mb-6">
           <div class="flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-4">
               <div class="bg-yellow-100 rounded-full p-3">
@@ -309,7 +319,7 @@
         </div>
 
         <!-- Update Button -->
-        <div v-if="booking.canUpdate && booking.status !== 4" class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mb-6">
+        <div v-if="booking.canUpdate && booking.status !== 2" class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mb-6">
           <div class="flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-4">
               <div class="bg-blue-100 rounded-full p-3">
@@ -445,9 +455,12 @@
                   <p class="text-lg font-bold text-green-700">
                     Amount: Rp {{ getPaymentAmount().toLocaleString('id-ID') }}
                   </p>
+                  <!-- Removed: extraPay display as feature removed -->
+                  <!--
                   <div v-if="booking?.status === 0 && booking?.extraPay > 0" class="text-xs text-gray-600 mt-1">
                     (Base Price: Rp {{ booking.totalPrice.toLocaleString('id-ID') }} + Extra: Rp {{ booking.extraPay.toLocaleString('id-ID') }})
                   </div>
+                  -->
                 </div>
               </div>
             </div>
@@ -475,7 +488,8 @@
       </div>
     </Teleport>
 
-    <!-- Refund Confirmation Modal -->
+    <!-- Removed: Refund Confirmation Modal as refund feature removed -->
+    <!--
     <Teleport to="body">
       <div
         v-if="showRefundModal"
@@ -483,7 +497,6 @@
         @click.self="showRefundModal = false"
       >
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
-          <!-- Modal Header -->
           <div class="bg-blue-600 text-white p-6">
             <div class="flex items-center gap-3">
               <div class="flex-shrink-0">
@@ -496,8 +509,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Modal Body -->
           <div class="p-6">
             <p class="text-gray-700 mb-4">
               Are you sure you want to process the refund for this booking?
@@ -514,8 +525,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Modal Footer -->
           <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end">
             <button
               @click="showRefundModal = false"
@@ -536,6 +545,7 @@
         </div>
       </div>
     </Teleport>
+    -->
   </div>
 </template>
 
@@ -555,7 +565,8 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const showCancelModal = ref(false)
 const showPaymentModal = ref(false)
-const showRefundModal = ref(false)
+// Removed: showRefundModal as refund feature removed
+// const showRefundModal = ref(false)
 const processingAction = ref(false)
 
 const fetchBookingDetail = async () => {
@@ -608,19 +619,9 @@ const formatDateTime = (dateString: string): string => {
 const getPaymentAmount = (): number => {
   if (!booking.value) return 0
   
-  // Status 0 with extraPay: Pay totalPrice + extraPay
-  if (booking.value.status === 0 && booking.value.extraPay > 0) {
-    return booking.value.totalPrice + booking.value.extraPay
-  }
-  
-  // Status 0 without extraPay: Pay totalPrice
+  // Status 0: Pay totalPrice (extraPay feature removed)
   if (booking.value.status === 0) {
     return booking.value.totalPrice
-  }
-  
-  // Other status with extraPay: Pay extraPay only
-  if (booking.value.extraPay > 0) {
-    return booking.value.extraPay
   }
   
   return 0
@@ -629,8 +630,8 @@ const getPaymentAmount = (): number => {
 const handlePay = async () => {
   if (!booking.value) return
   
-  // Prevent payment if booking is cancelled
-  if (booking.value.status === 4) {
+  // Prevent payment if booking is cancelled (status 2)
+  if (booking.value.status === 2) {
     toast.error('Cannot confirm payment for cancelled booking')
     return
   }
@@ -638,23 +639,25 @@ const handlePay = async () => {
   showPaymentModal.value = true
 }
 
+// Removed: handleRefund method as refund feature removed
+/*
 const handleRefund = async () => {
   if (!booking.value) return
   
-  // Prevent refund if booking is cancelled
-  if (booking.value.status === 4) {
+  if (booking.value.status === 2) {
     toast.error('Cannot process refund for cancelled booking')
     return
   }
   
   showRefundModal.value = true
 }
+*/
 
 const confirmPayment = async () => {
   if (!booking.value) return
   
-  // Double check before API call
-  if (booking.value.status === 4) {
+  // Double check before API call (status 2 = cancelled)
+  if (booking.value.status === 2) {
     toast.error('Cannot confirm payment for cancelled booking')
     showPaymentModal.value = false
     return
@@ -695,11 +698,12 @@ const confirmCancel = async () => {
   }
 }
 
+// Removed: confirmRefund method as refund feature removed
+/*
 const confirmRefund = async () => {
   if (!booking.value) return
   
-  // Double check before API call
-  if (booking.value.status === 4) {
+  if (booking.value.status === 2) {
     toast.error('Cannot process refund for cancelled booking')
     showRefundModal.value = false
     return
@@ -712,7 +716,6 @@ const confirmRefund = async () => {
     booking.value = updatedBooking
     showRefundModal.value = false
     
-    // Refresh the booking list in the store
     await bookingStore.fetchAllBookings()
   } catch (err: any) {
     console.error('Refund request failed:', err)
@@ -720,6 +723,7 @@ const confirmRefund = async () => {
     processingAction.value = false
   }
 }
+*/
 
 const handleUpdate = () => {
   if (!booking.value) return

@@ -207,6 +207,8 @@ export const useBookingStore = defineStore('booking', () => {
     }
   }
 
+  // Removed: requestRefund method as refund feature removed
+  /*
   const requestRefund = async (bookingId: string): Promise<Booking> => {
     loading.value = true
     error.value = null
@@ -242,6 +244,7 @@ export const useBookingStore = defineStore('booking', () => {
       loading.value = false
     }
   }
+  */
 
   const getStatusClass = (statusColor?: string): string => {
     switch (statusColor) {
@@ -264,7 +267,8 @@ export const useBookingStore = defineStore('booking', () => {
     createBooking,
     payBooking,
     cancelBooking,
-    requestRefund,
+    // Removed: requestRefund as refund feature removed
+    // requestRefund,
     getStatusClass
   }
 })

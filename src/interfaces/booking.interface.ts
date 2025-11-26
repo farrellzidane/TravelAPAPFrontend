@@ -15,16 +15,18 @@ export interface Booking {
   totalDays: number
   capacity: number
   totalPrice: number
-  extraPay: number
-  refund: number
-  status: number
+  // Removed: extraPay and refund fields as per updated requirements
+  // extraPay: number
+  // refund: number
+  status: number // 0 = Waiting for Payment, 1 = Payment Confirmed, 2 = Cancelled
   statusText?: string
   statusColor?: string
   createdDate: string
   updatedDate: string
   canPay?: boolean
   canUpdate?: boolean
-  canRefund?: boolean
+  // Removed: canRefund as refund feature removed
+  // canRefund?: boolean
   canCancel?: boolean
   breakfast: boolean
 }

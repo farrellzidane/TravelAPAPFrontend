@@ -150,8 +150,10 @@ export const bookingService = {
       
       throw error
     }
-  },
+  }
 
+  // Removed: requestRefund method as refund feature removed
+  /*
   async requestRefund(bookingId: string): Promise<Booking> {
     try {
       console.log('Requesting refund for booking:', bookingId)
@@ -172,4 +174,5 @@ export const bookingService = {
       throw error
     }
   }
+  */
 }
