@@ -21,54 +21,17 @@ export const usePropertyStore = defineStore('property', {
     properties: [],
     currentProperty: null,
     filters: {
-      search: '',
+      name: '',
       type: '',
-      status: ''
+      province: ''
     },
     loading: false,
     error: null
   }),
 
   getters: {
-    // Filter properties berdasarkan filter yang aktif
-    filteredProperties: (state): Property[] => {
-      let result = [...state.properties]
-
-      // Filter by search
-      if (state.filters.search) {
-        const searchLower = state.filters.search.toLowerCase()
-        result = result.filter(p =>
-          p.propertyName.toLowerCase().includes(searchLower) ||
-          p.propertyID?.toLowerCase().includes(searchLower)
-        )
-      }
-
-      // Filter by type
-      if (state.filters.type) {
-        result = result.filter(p => p.typeName === state.filters.type)
-      }
-
-      // Filter by status
-      if (state.filters.status) {
-        result = result.filter(p => p.activeStatusName === state.filters.status)
-      }
-
-      // Sort by updatedDate (newest first)
-      result.sort((a, b) => {
-        const dateA = new Date(a.updatedDate || a.createdDate).getTime()
-        const dateB = new Date(b.updatedDate || b.createdDate).getTime()
-        return dateB - dateA
-      })
-
-      return result
-    },
-
     // Get total properties count
     totalProperties: (state): number => state.properties.length,
-
-    // Get active properties count
-    activeProperties: (state): number => 
-      state.properties.filter(p => p.activeStatusName === 'Active').length,
 
     // Get property by ID
     getPropertyById: (state) => (id: string): Property | undefined => 
@@ -76,7 +39,7 @@ export const usePropertyStore = defineStore('property', {
   },
 
   actions: {
-    // Fetch all properties
+    // Fetch all active properties
     async fetchAllProperties(): Promise<void> {
       this.loading = true
       this.error = null
@@ -98,9 +61,37 @@ export const usePropertyStore = defineStore('property', {
         }
       } catch (error: any) {
         console.error('Error fetching properties:', error)
-        this.error = error.message || 'Failed to load properties'
-        toast.error('Failed to load properties')
-        throw error
+        this.error = error.response?.data?.message || error.message || 'Failed to load properties'
+        toast.error(this.error)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // Fetch filtered properties
+    async fetchFilteredProperties(): Promise<void> {
+      this.loading = true
+      this.error = null
+
+      try {
+        const params: any = {}
+        
+        if (this.filters.name) params.name = this.filters.name
+        if (this.filters.type) params.type = this.filters.type
+        if (this.filters.province) params.province = this.filters.province
+
+        const response: AxiosResponse<CommonResponseInterface<Property[]>> = 
+          await axios.get(`${API_BASE_URL}/api/property`, { params })
+
+        if (response.data.status === 200 && response.data.data) {
+          this.properties = response.data.data
+        } else {
+          throw new Error(response.data.message || 'Failed to fetch properties')
+        }
+      } catch (error: any) {
+        console.error('Error fetching filtered properties:', error)
+        this.error = error.response?.data?.message || error.message || 'Failed to load properties'
+        toast.error(this.error)
       } finally {
         this.loading = false
       }
@@ -123,8 +114,8 @@ export const usePropertyStore = defineStore('property', {
         }
       } catch (error: any) {
         console.error('Error fetching property:', error)
-        this.error = error.message || 'Failed to load property'
-        toast.error('Failed to load property details')
+        this.error = error.response?.data?.message || error.message || 'Failed to load property'
+        toast.error(this.error)
         throw error
       } finally {
         this.loading = false

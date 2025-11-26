@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { getCurrentRole } from '@/config/axios.config'
+import { toast } from 'vue-sonner'
 import HomeView from '../views/HomeView.vue'
 import PropertyView from '../views/property/PropertyView.vue'
 import CreateProperty from '../views/property/CreateProperty.vue'
@@ -92,6 +94,17 @@ const router = createRouter({
       path: '/topup/create',
       name: 'create-topup',
       component: CreateTopUp,
+      beforeEnter: (to, from, next) => {
+        const role = getCurrentRole()
+        if (role === 'SUPERADMIN') {
+          toast.error('Access Denied', {
+            description: 'Superadmin tidak dapat membuat top-up transaction'
+          })
+          next('/topup')
+        } else {
+          next()
+        }
+      }
     },
     {
       path: '/topup/:id',
@@ -102,11 +115,33 @@ const router = createRouter({
       path: '/payment-method',
       name: 'payment-method',
       component: PaymentMethodView,
+      beforeEnter: (to, from, next) => {
+        const role = getCurrentRole()
+        if (role === 'CUSTOMER') {
+          toast.error('Access Denied', {
+            description: 'Customer tidak memiliki akses ke halaman Payment Method'
+          })
+          next('/')
+        } else {
+          next()
+        }
+      }
     },
     {
       path: '/payment-method/create',
       name: 'create-payment-method',
       component: CreatePaymentMethod,
+      beforeEnter: (to, from, next) => {
+        const role = getCurrentRole()
+        if (role === 'CUSTOMER') {
+          toast.error('Access Denied', {
+            description: 'Customer tidak memiliki akses ke halaman Payment Method'
+          })
+          next('/')
+        } else {
+          next()
+        }
+      }
     }
     // {
     //   path: '/about',

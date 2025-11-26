@@ -29,9 +29,14 @@
               v-model="formData.customerId"
               type="text"
               required
-              placeholder="Enter customer ID"
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              :readonly="isCustomer"
+              :placeholder="isCustomer ? 'Auto-filled from your account' : 'Enter customer ID'"
+              :class="[
+                'w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                isCustomer ? 'bg-gray-100 cursor-not-allowed' : ''
+              ]"
             />
+            <p v-if="isCustomer" class="mt-1 text-sm text-gray-500">Your customer ID is automatically filled</p>
           </div>
 
           <!-- Payment Method -->
@@ -109,10 +114,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTopUpStore } from '@/stores/topup/topup.stores'
 import { usePaymentMethodStore } from '@/stores/paymentmethod/paymentmethod.stores'
+import { getCurrentRole, MOCK_USER_IDS } from '@/config/axios.config'
 import type { CreateTopUpRequest } from '@/interfaces/topup.interface'
 
 const router = useRouter()
@@ -128,7 +134,15 @@ const formData = reactive<CreateTopUpRequest>({
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 
+const currentRole = computed(() => getCurrentRole())
+const isCustomer = computed(() => currentRole.value === 'CUSTOMER')
+
 onMounted(async () => {
+  // Auto-fill customer ID if user is customer
+  if (isCustomer.value) {
+    formData.customerId = MOCK_USER_IDS.CUSTOMER
+  }
+  
   // Load payment methods
   await paymentMethodStore.fetchAllPaymentMethods()
 })

@@ -9,7 +9,7 @@
         </div>
 
         <!-- Action Section -->
-        <div class="mb-6">
+        <div class="mb-6" v-if="!isSuperAdmin">
           <button
             @click="goToCreateTopUp"
             class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center gap-2"
@@ -40,89 +40,33 @@
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="topUpStore.sortedTopUps.length === 0" class="text-center py-12">
+        <div v-else-if="topUpStore.topUps.length === 0" class="text-center py-12">
           <div class="text-gray-400 text-6xl mb-4">💳</div>
           <p class="text-gray-600 text-lg">No top-up transactions found</p>
           <p class="text-gray-500 text-sm mt-2">Start by creating a new top-up transaction</p>
         </div>
 
-        <!-- Top-Ups Table -->
-        <div v-else class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="bg-blue-50 border-b border-blue-100">
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  ID
-                </th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Customer ID
-                </th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Payment Method
-                </th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Status
-                </th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Date
-                </th>
-                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr
-                v-for="topUp in topUpStore.sortedTopUps"
-                :key="topUp.transactionId"
-                class="hover:bg-gray-50 transition duration-150"
-              >
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ topUp.transactionId }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  {{ topUp.endUserId }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  {{ topUp.paymentMethodName || 'N/A' }}
-                  <span v-if="topUp.provider" class="text-gray-500 text-xs block">{{ topUp.provider }}</span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                  Rp {{ formatCurrency(topUp.amount) }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    :class="[
-                      'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full',
-                      topUp.statusColor === 'success' ? 'bg-green-100 text-green-800' :
-                      topUp.statusColor === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    ]"
-                  >
-                    {{ topUp.statusText }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  {{ formatDate(topUp.createdAt) }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">
-                  <button
-                    @click="goToDetail(topUp.transactionId)"
-                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105"
-                  >
-                    Detail
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Top-Ups Table with VDataTable -->
+        <div v-else>
+          <!-- Status Filter -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Status:</label>
+            <select
+              v-model="statusFilter"
+              class="border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Success">Success</option>
+              <option value="Failed">Failed</option>
+            </select>
+          </div>
+
+          <VDataTable :data="filteredTopUps" :columns="columns" :page-size="10" />
         </div>
 
         <!-- Summary Stats -->
-        <div v-if="topUpStore.sortedTopUps.length > 0" class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div v-if="topUpStore.topUps.length > 0" class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="bg-blue-50 rounded-lg p-4">
             <p class="text-gray-600 text-sm">Total Transactions</p>
             <p class="text-2xl font-bold text-gray-900">{{ topUpStore.totalTopUps }}</p>
@@ -142,15 +86,32 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed, ref, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTopUpStore } from '@/stores/topup/topup.stores'
+import VDataTable from '@/components/common/VDataTable.vue'
+import type { ColumnDef } from '@tanstack/vue-table'
+import type { TopUpTransaction } from '@/interfaces/topup.interface'
+import { getCurrentRole } from '@/config/axios.config'
 
 const router = useRouter()
 const topUpStore = useTopUpStore()
+const statusFilter = ref('')
+
+// Role checking
+const currentRole = computed(() => getCurrentRole())
+const isSuperAdmin = computed(() => currentRole.value === 'SUPERADMIN')
 
 onMounted(async () => {
   await topUpStore.fetchAllTopUps()
+})
+
+// Filter top-ups by status
+const filteredTopUps = computed(() => {
+  if (!statusFilter.value) {
+    return topUpStore.topUps
+  }
+  return topUpStore.topUps.filter(topUp => topUp.status === statusFilter.value)
 })
 
 const goToCreateTopUp = () => {
@@ -177,4 +138,71 @@ const formatDate = (dateString: string): string => {
     minute: '2-digit'
   }).format(date)
 }
+
+// Define table columns
+const columns: ColumnDef<TopUpTransaction>[] = [
+  {
+    accessorKey: 'transactionId',
+    header: 'ID',
+    cell: ({ row }) => row.original.transactionId,
+  },
+  {
+    accessorKey: 'endUserId',
+    header: 'Customer ID',
+    cell: ({ row }) => row.original.endUserId,
+  },
+  {
+    accessorKey: 'paymentMethodName',
+    header: 'Payment Method',
+    cell: ({ row }) => {
+      const name = row.original.paymentMethodName || 'N/A'
+      const provider = row.original.provider
+      return h('div', [
+        h('div', name),
+        provider ? h('div', { class: 'text-gray-500 text-xs' }, provider) : null
+      ])
+    },
+  },
+  {
+    accessorKey: 'amount',
+    header: 'Amount',
+    cell: ({ row }) => h('span', { class: 'font-semibold' }, `Rp ${formatCurrency(row.original.amount)}`),
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({ row }) => {
+      const status = row.original.status
+      const colorClass = 
+        status === 'Success' ? 'bg-green-100 text-green-800' :
+        status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+        'bg-red-100 text-red-800'
+      
+      return h('span', {
+        class: `px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${colorClass}`
+      }, status)
+    },
+  },
+  {
+    accessorKey: 'createdAt',
+    header: 'Date',
+    cell: ({ row }) => formatDate(row.original.createdAt),
+    enableSorting: true,
+    sortingFn: (rowA, rowB) => {
+      const dateA = new Date(rowA.original.createdAt).getTime()
+      const dateB = new Date(rowB.original.createdAt).getTime()
+      return dateA - dateB
+    },
+  },
+  {
+    id: 'actions',
+    header: 'Action',
+    cell: ({ row }) => {
+      return h('button', {
+        onClick: () => goToDetail(row.original.transactionId),
+        class: 'px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105'
+      }, 'Detail')
+    },
+  },
+]
 </script>

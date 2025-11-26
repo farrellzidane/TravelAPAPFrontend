@@ -20,9 +20,9 @@ export interface Property {
 }
 
 export interface PropertyFilter {
-  search: string
-  type: string
-  status: string
+  name: string
+  type: number | string
+  province: number | string
 }
 
 export interface DateFilter {

@@ -89,18 +89,31 @@
               ></textarea>
             </div>
 
-            <!-- Owner ID -->
+            <!-- Owner ID - Dropdown for Superadmin, Auto-filled for Owner -->
             <div>
               <label class="block text-sm font-medium text-blue-700 mb-2">
-                Owner ID (UUID) <span class="text-red-500">*</span>
+                Owner ID <span class="text-red-500">*</span>
               </label>
+              <!-- Superadmin: Dropdown -->
+              <select
+                v-if="isSuperAdmin"
+                v-model="formData.ownerID"
+                required
+                @change="handleOwnerChange"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Select Owner</option>
+                <option v-for="owner in ownerOptions" :key="owner.id" :value="owner.id">
+                  {{ owner.name }}
+                </option>
+              </select>
+              <!-- Owner: Readonly Input -->
               <input
+                v-else
                 v-model="formData.ownerID"
                 type="text"
-                required
-                placeholder="e.g., 550e8400-e29b-41d4-a716-446655440000"
-                pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                readonly
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
               />
             </div>
 
@@ -114,7 +127,11 @@
                 type="text"
                 required
                 placeholder="Enter owner name"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                :readonly="isOwner"
+                :class="[
+                  'w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                  isOwner ? 'bg-gray-100 cursor-not-allowed' : ''
+                ]"
               />
             </div>
           </div>
@@ -156,7 +173,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import type { Province, CreatePropertyRequest } from '@/interfaces/property.interface'
@@ -165,12 +182,24 @@ import { PropertyTypeByName } from '@/interfaces/property.interface'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import VDynamicForm from '@/components/property/VDynamicForm.vue'
+import { getCurrentRole, MOCK_USER_IDS } from '@/config/axios.config'
 
 const router = useRouter()
 const propertyStore = usePropertyStore()
 
 const loadingProvinces = ref(false)
 const provinces = ref<Province[]>([])
+
+// Role checking
+const currentRole = computed(() => getCurrentRole())
+const isSuperAdmin = computed(() => currentRole.value === 'SUPERADMIN')
+const isOwner = computed(() => currentRole.value === 'ACCOMMODATION_OWNER')
+
+// Owner options for Superadmin
+const ownerOptions = [
+  { id: MOCK_USER_IDS.ACCOMMODATION_OWNER, name: 'Owner 1 (a058fb1b...)' },
+  // You can add more mock owners here if needed
+]
 
 const formData = ref<{
   propertyName: string
@@ -216,6 +245,14 @@ const handlePropertyTypeChange = () => {
     unitCount: null,
     roomTypeDescription: ''
   }]
+}
+
+const handleOwnerChange = () => {
+  // Auto-fill owner name when owner is selected (for Superadmin)
+  const selectedOwner = ownerOptions.find(o => o.id === formData.value.ownerID)
+  if (selectedOwner) {
+    formData.value.ownerName = selectedOwner.name.split(' (')[0] // Extract name without UUID
+  }
 }
 
 const validateForm = (): boolean => {
@@ -361,5 +398,11 @@ const handleBack = () => {
 
 onMounted(() => {
   fetchProvinces()
+  
+  // Auto-fill owner data if user is Accommodation Owner
+  if (isOwner.value) {
+    formData.value.ownerID = MOCK_USER_IDS.ACCOMMODATION_OWNER
+    formData.value.ownerName = 'Accommodation Owner' // You can fetch from user service
+  }
 })
 </script>

@@ -92,7 +92,7 @@
           </div>
 
           <!-- Admin Actions (for Superadmin only) -->
-          <div v-if="topUpStore.currentTopUp.status === 'Pending'" class="border-t pt-6">
+          <div v-if="isSuperAdmin && topUpStore.currentTopUp.status === 'Pending'" class="border-t pt-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Update Status</h3>
             <div class="flex gap-4">
               <button
@@ -113,7 +113,7 @@
           </div>
 
           <!-- Delete Action (for Superadmin only) -->
-          <div class="border-t pt-6">
+          <div v-if="isSuperAdmin" class="border-t pt-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Danger Zone</h3>
             <button
               @click="handleDelete"
@@ -130,9 +130,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTopUpStore } from '@/stores/topup/topup.stores'
+import { getCurrentRole } from '@/config/axios.config'
 import type { UpdateTopUpStatusRequest } from '@/interfaces/topup.interface'
 
 const router = useRouter()
@@ -143,6 +144,9 @@ const isUpdating = ref(false)
 const isDeleting = ref(false)
 
 const topUpId = ref(route.params.id as string)
+
+const currentRole = computed(() => getCurrentRole())
+const isSuperAdmin = computed(() => currentRole.value === 'SUPERADMIN')
 
 onMounted(async () => {
   await loadTopUp()

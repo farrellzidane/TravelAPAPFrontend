@@ -3,9 +3,12 @@ import {
   useVueTable,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
   FlexRender,
 } from '@tanstack/vue-table'
-import type { ColumnDef } from '@tanstack/vue-table'
+import type { ColumnDef, SortingState, ColumnFiltersState, Updater } from '@tanstack/vue-table'
+import { ref } from 'vue'
 
 interface Props<T> {
   data: T[]
@@ -23,6 +26,9 @@ const props = withDefaults(defineProps<Props<T>>(), {
   showPagination: true,
 })
 
+const sorting = ref<SortingState>([])
+const columnFilters = ref<ColumnFiltersState>([])
+
 const table = useVueTable<T>({
   get data() {
     return props.data
@@ -32,6 +38,22 @@ const table = useVueTable<T>({
   },
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getFilteredRowModel: getFilteredRowModel(),
+  state: {
+    get sorting() {
+      return sorting.value
+    },
+    get columnFilters() {
+      return columnFilters.value
+    },
+  },
+  onSortingChange: (updaterOrValue: Updater<SortingState>) => {
+    sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue
+  },
+  onColumnFiltersChange: (updaterOrValue: Updater<ColumnFiltersState>) => {
+    columnFilters.value = typeof updaterOrValue === 'function' ? updaterOrValue(columnFilters.value) : updaterOrValue
+  },
   initialState: {
     pagination: {
       pageSize: props.pageSize,
@@ -69,11 +91,25 @@ const table = useVueTable<T>({
               :key="header.id"
               class="px-6 py-4 text-left text-sm font-medium text-gray-700"
             >
-              <FlexRender
+              <div
                 v-if="!header.isPlaceholder"
-                :render="header.column.columnDef.header"
-                :props="header.getContext()"
-              />
+                :class="header.column.getCanSort() ? 'cursor-pointer select-none flex items-center gap-2' : ''"
+                @click="header.column.getToggleSortingHandler()?.($event)"
+              >
+                <FlexRender
+                  :render="header.column.columnDef.header"
+                  :props="header.getContext()"
+                />
+                <span v-if="header.column.getCanSort()" class="text-gray-400">
+                  {{
+                    header.column.getIsSorted() === 'asc'
+                      ? '▲'
+                      : header.column.getIsSorted() === 'desc'
+                        ? '▼'
+                        : '⇅'
+                  }}
+                </span>
+              </div>
             </th>
           </tr>
         </thead>
