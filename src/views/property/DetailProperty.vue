@@ -265,6 +265,9 @@
                         Room ID
                       </th>
                       <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                        Room Name
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Status
                       </th>
                       <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -281,6 +284,9 @@
                       <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {{ room.roomID }}
                       </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">
+                        {{ room.name || '-' }}
+                      </td>
                       <td class="px-6 py-4 whitespace-nowrap">
                         <span
                           :class="[
@@ -294,13 +300,15 @@
                       <td class="px-6 py-4 whitespace-nowrap text-center">
                         <div class="flex gap-2 justify-center">
                           <button
-                            @click="handleBook(room.roomID)"
+                            v-if="isCustomer"
+                            @click="handleBook(room)"
                             :disabled="getRoomDisplayStatus(room).status !== 1"
                             class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition disabled:bg-gray-300 disabled:cursor-not-allowed"
                           >
                             Book
                           </button>
                           <button
+                            v-if="isSuperAdmin || isAccommodationOwner"
                             @click="openMaintenanceModal(room)"
                             :disabled="room.availabilityStatus !== 1"
                             class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-semibold rounded-lg shadow transition disabled:bg-gray-300 disabled:cursor-not-allowed"
@@ -508,6 +516,7 @@ import { toast } from 'vue-sonner'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import { useRoomStore } from '@/stores/room/room.stores'
+import { getCurrentRole } from '@/config/axios.config'
 import type { Property, DateFilter } from '@/interfaces/property.interface'
 import type { Room, MaintenanceForm, CreateMaintenanceRequest } from '@/interfaces/room.interface'
 import { PROVINCE_MAP } from '@/interfaces/property.interface'
@@ -534,6 +543,12 @@ const maintenanceForm = ref<MaintenanceForm>({
   maintenanceStart: '',
   maintenanceEnd: ''
 })
+
+// Role-based access control using getCurrentRole() approach
+const currentRole = computed(() => getCurrentRole())
+const isSuperAdmin = computed(() => currentRole.value === 'SUPERADMIN')
+const isAccommodationOwner = computed(() => currentRole.value === 'ACCOMMODATION_OWNER')
+const isCustomer = computed(() => currentRole.value === 'CUSTOMER')
 
 const today = computed(() => {
   return new Date().toISOString().split('T')[0]
@@ -771,25 +786,22 @@ const handleMaintenanceSubmit = async () => {
   }
 }
 
-const handleBook = (roomId: string) => {
+const handleBook = (room: Room) => {
   if (!dateFilter.value.checkIn || !dateFilter.value.checkOut) {
     toast.warning('Please select check-in and check-out dates first')
     return
   }
   
-  // Extract room number from roomId (e.g., "HOT-0000-001-102" -> "102")
-  const roomNumber = roomId.split('-').pop() || ''
-  
   // Navigate to create booking page with room info and dates
   router.push({
     name: 'booking-create-with-room',
     params: {
-      idRoom: roomId
+      idRoom: room.roomID
     },
     query: {
       checkIn: dateFilter.value.checkIn,
       checkOut: dateFilter.value.checkOut,
-      roomNumber: roomNumber
+      roomNumber: room.name || room.roomID
     }
   })
 }

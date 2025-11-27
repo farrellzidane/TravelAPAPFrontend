@@ -35,6 +35,47 @@ export const getCurrentRole = (): string => {
   return localStorage.getItem('userRole') || 'SUPERADMIN'
 }
 
+// Function to decode JWT token and get user info
+export const getCurrentUserInfo = (): { userId: string; role: string } | null => {
+  try {
+    const token = getCurrentToken()
+    // JWT format: header.payload.signature
+    const parts = token.split('.')
+    if (parts.length !== 3) {
+      return null
+    }
+    
+    // Decode payload (base64url)
+    const payload = JSON.parse(atob(parts[1]))
+    return {
+      userId: payload.userId,
+      role: payload.role
+    }
+  } catch (error) {
+    console.error('Error decoding token:', error)
+    return null
+  }
+}
+
+// Function to get current user ID
+export const getCurrentUserId = (): string => {
+  const userInfo = getCurrentUserInfo()
+  return userInfo?.userId || MOCK_USER_IDS.SUPERADMIN
+}
+
+// Mock user names based on role
+export const MOCK_USER_NAMES = {
+  SUPERADMIN: 'Super Admin',
+  ACCOMMODATION_OWNER: 'Accommodation Owner',
+  CUSTOMER: 'John Doe'
+}
+
+// Function to get current user name
+export const getCurrentUserName = (): string => {
+  const role = getCurrentRole()
+  return MOCK_USER_NAMES[role as keyof typeof MOCK_USER_NAMES] || 'Unknown User'
+}
+
 // Add request interceptor to automatically include Bearer token
 axios.interceptors.request.use(
   (config) => {

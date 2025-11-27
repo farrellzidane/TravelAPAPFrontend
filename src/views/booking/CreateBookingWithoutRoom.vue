@@ -137,7 +137,7 @@
 
           <!-- Row 4: Customer ID and Customer Name -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Customer ID -->
+            <!-- Customer ID (Disabled) -->
             <div>
               <label class="block text-sm font-medium text-blue-700 mb-2">
                 Customer ID <span class="text-red-500">*</span>
@@ -146,8 +146,9 @@
                 v-model="formData.customerID"
                 type="text"
                 required
+                disabled
                 placeholder="550e8400-e29b-41d4-a716-446655440000"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 cursor-not-allowed"
               />
             </div>
 
@@ -243,11 +244,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { bookingService } from '@/services/booking.service'
 import { propertyService } from '@/services/property.service'
+import { getCurrentUserId, getCurrentRole } from '@/config/axios.config'
 import type { CreateBookingWithoutRoomRequest } from '@/interfaces/booking.interface'
 import type { Property } from '@/interfaces/property.interface'
 import type { RoomType, Room } from '@/interfaces/room.interface'
@@ -532,6 +534,17 @@ const handleBack = () => {
 }
 
 onMounted(() => {
+  // Check if user is customer
+  const currentRole = getCurrentRole()
+  if (currentRole !== 'CUSTOMER') {
+    toast.error('Only customers can create bookings')
+    router.push('/property')
+    return
+  }
+  
+  // Auto-fill customer ID from current user
+  formData.value.customerID = getCurrentUserId()
+  
   fetchProperties()
 })
 </script>

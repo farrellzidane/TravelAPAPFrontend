@@ -25,14 +25,15 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Property Name -->
               <div>
-                <label class="block text-sm font-medium text-blue-700 mb-2">
+                <label class="block text-sm font-medium text-gray-500 mb-2">
                   Property <span class="text-red-500">*</span>
                 </label>
                 <select
                   v-model="formData.propertyID"
                   @change="onPropertyChange"
                   required
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                 >
                   <option value="">Select Property</option>
                   <option 
@@ -47,15 +48,15 @@
 
               <!-- Room Type -->
               <div>
-                <label class="block text-sm font-medium text-blue-700 mb-2">
+                <label class="block text-sm font-medium text-gray-500 mb-2">
                   Room Type <span class="text-red-500">*</span>
                 </label>
                 <select
                   v-model="formData.roomTypeID"
                   @change="onRoomTypeChange"
                   required
-                  :disabled="!formData.propertyID || loadingRoomTypes"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                 >
                   <option value="">Select Room Type</option>
                   <option 
@@ -73,15 +74,15 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Room Name -->
               <div>
-                <label class="block text-sm font-medium text-blue-700 mb-2">
+                <label class="block text-sm font-medium text-gray-500 mb-2">
                   Room Name <span class="text-red-500">*</span>
                 </label>
                 <select
                   v-model="formData.roomID"
                   @change="onRoomChange"
                   required
-                  :disabled="!formData.roomTypeID || loadingRooms"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                 >
                   <option value="">Select Room</option>
                   <option 
@@ -150,29 +151,31 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Customer ID -->
               <div>
-                <label class="block text-sm font-medium text-blue-700 mb-2">
+                <label class="block text-sm font-medium text-gray-500 mb-2">
                   Customer ID <span class="text-red-500">*</span>
                 </label>
                 <input
                   v-model="formData.customerID"
                   type="text"
                   required
+                  disabled
                   placeholder="550e8400-e29b-41d4-a716-446655440000"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                 />
               </div>
 
               <!-- Customer Name -->
               <div>
-                <label class="block text-sm font-medium text-blue-700 mb-2">
+                <label class="block text-sm font-medium text-gray-500 mb-2">
                   Customer Name <span class="text-red-500">*</span>
                 </label>
                 <input
                   v-model="formData.customerName"
                   type="text"
                   required
+                  disabled
                   placeholder="John Doe"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                 />
               </div>
             </div>
@@ -181,30 +184,32 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Customer Email -->
               <div>
-                <label class="block text-sm font-medium text-blue-700 mb-2">
+                <label class="block text-sm font-medium text-gray-500 mb-2">
                   Customer Email <span class="text-red-500">*</span>
                 </label>
                 <input
                   v-model="formData.customerEmail"
                   type="email"
                   required
+                  disabled
                   placeholder="john.doe@example.com"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                 />
               </div>
 
               <!-- Customer Phone -->
               <div>
-                <label class="block text-sm font-medium text-blue-700 mb-2">
+                <label class="block text-sm font-medium text-gray-500 mb-2">
                   Customer Phone <span class="text-red-500">*</span>
                 </label>
                 <input
                   v-model="formData.customerPhone"
                   type="tel"
                   required
+                  disabled
                   placeholder="081234567890"
                   pattern="[0-9]{10,13}"
-                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
                 />
                 <p class="text-xs text-gray-500 mt-1">Format: 10-13 digits</p>
               </div>
@@ -233,14 +238,26 @@
               <button
                 type="button"
                 @click="handleBack"
-                :disabled="submitting"
+                :disabled="submitting || cancelling"
                 class="flex-1 px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Back
               </button>
               <button
+                type="button"
+                @click="handleCancel"
+                :disabled="submitting || cancelling"
+                class="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-lg transition disabled:bg-red-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <svg v-if="cancelling" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ cancelling ? 'Cancelling...' : 'Cancel Booking' }}</span>
+              </button>
+              <button
                 type="submit"
-                :disabled="submitting || !isFormValid"
+                :disabled="submitting || cancelling || !isFormValid"
                 class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <span v-if="submitting" class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
@@ -260,6 +277,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { bookingService } from '@/services/booking.service'
 import { propertyService } from '@/services/property.service'
+import { getCurrentRole } from '@/config/axios.config'
 import type { UpdateBookingRequest, Booking } from '@/interfaces/booking.interface'
 import type { Property } from '@/interfaces/property.interface'
 import type { RoomType, Room } from '@/interfaces/room.interface'
@@ -268,6 +286,7 @@ const route = useRoute()
 const router = useRouter()
 
 const submitting = ref(false)
+const cancelling = ref(false)
 const loadingBooking = ref(false)
 const loadingProperties = ref(false)
 const loadingRoomTypes = ref(false)
@@ -596,7 +615,40 @@ const handleBack = () => {
   router.back()
 }
 
+const handleCancel = async () => {
+  if (!confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
+    return
+  }
+
+  try {
+    cancelling.value = true
+
+    const result = await bookingService.cancelBooking(formData.value.bookingID)
+
+    toast.success('Booking cancelled successfully!')
+
+    // Redirect to booking detail page
+    setTimeout(() => {
+      router.push(`/bookings/${result.bookingID}`)
+    }, 1500)
+
+  } catch (error: any) {
+    console.error('Error cancelling booking:', error)
+    toast.error(error.message || 'Failed to cancel booking')
+  } finally {
+    cancelling.value = false
+  }
+}
+
 onMounted(() => {
+  // Role validation: Only CUSTOMER can update booking
+  const currentRole = getCurrentRole()
+  if (currentRole !== 'CUSTOMER') {
+    toast.error('Access denied: Only customers can update bookings')
+    router.push('/bookings')
+    return
+  }
+  
   fetchBookingDetails()
 })
 </script>

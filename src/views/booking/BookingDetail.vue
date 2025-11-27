@@ -84,15 +84,19 @@
               <div class="space-y-2">
                 <div>
                   <label class="block text-sm font-medium text-blue-700">Property Name</label>
-                  <p class="text-base font-semibold text-gray-800">{{ booking.propertyName }}</p>
+                  <p class="text-base font-semibold text-gray-800">{{ booking.propertyName || '-' }}</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-blue-700">Room Type</label>
+                  <p class="text-base font-semibold text-gray-800">{{ booking.roomName || '-' }}</p>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-blue-700">Room Name</label>
-                  <p class="text-base font-semibold text-gray-800">{{ booking.roomName }}</p>
+                  <p class="text-base font-semibold text-gray-800">{{ booking.roomNumber || '-' }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-blue-700">Room Number</label>
-                  <p class="text-base font-semibold text-gray-800">{{ booking.roomNumber }}</p>
+                  <label class="block text-sm font-medium text-blue-700">Room ID</label>
+                  <p class="text-xs font-mono text-gray-600 break-all">{{ booking.roomID || '-' }}</p>
                 </div>
               </div>
             </div>
@@ -289,6 +293,8 @@
         -->
 
         <!-- Pay Button (if waiting for payment) -->
+        <!-- REMOVED: Confirm Payment button - payment confirmation is handled by external payment system via API KEY -->
+        <!--
         <div v-if="booking.canPay && booking.status === 0" class="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-6 mb-6">
           <div class="flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-4">
@@ -317,9 +323,10 @@
             </button>
           </div>
         </div>
+        -->
 
         <!-- Update Button -->
-        <div v-if="booking.canUpdate && booking.status !== 2" class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mb-6">
+        <div v-if="isCustomer && booking.canUpdate && booking.status !== 2" class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mb-6">
           <div class="flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-4">
               <div class="bg-blue-100 rounded-full p-3">
@@ -550,10 +557,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { useBookingStore } from '@/stores/booking/booking.stores'
+import { getCurrentRole } from '@/config/axios.config'
 import type { Booking } from '@/interfaces/booking.interface'
 
 const route = useRoute()
@@ -568,6 +576,10 @@ const showPaymentModal = ref(false)
 // Removed: showRefundModal as refund feature removed
 // const showRefundModal = ref(false)
 const processingAction = ref(false)
+
+const isCustomer = computed(() => {
+  return getCurrentRole() === 'CUSTOMER'
+})
 
 const fetchBookingDetail = async () => {
   loading.value = true

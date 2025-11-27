@@ -72,7 +72,7 @@
 
           <!-- Row 3: Customer ID and Customer Name -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Customer ID -->
+            <!-- Customer ID (Disabled) -->
             <div>
               <label class="block text-sm font-medium text-blue-700 mb-2">
                 Customer ID <span class="text-red-500">*</span>
@@ -81,8 +81,9 @@
                 v-model="formData.customerID"
                 type="text"
                 required
+                disabled
                 placeholder="550e8400-e29b-41d4-a716-446655440000"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 cursor-not-allowed"
               />
             </div>
 
@@ -193,10 +194,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { bookingService } from '@/services/booking.service'
+import { getCurrentUserId, getCurrentRole } from '@/config/axios.config'
 import type { CreateBookingRequest } from '@/interfaces/booking.interface'
 
 const route = useRoute()
@@ -233,7 +235,6 @@ const formData = ref<BookingFormData>({
 const minDate = computed(() => {
   return new Date().toISOString().split('T')[0]
 })
-
 const initializeForm = () => {
   // Get roomID from route params
   const roomID = route.params.idRoom as string
@@ -249,8 +250,19 @@ const initializeForm = () => {
     return
   }
 
+  // Check if user is customer
+  const currentRole = getCurrentRole()
+  if (currentRole !== 'CUSTOMER') {
+    toast.error('Only customers can create bookings')
+    router.push('/property')
+    return
+  }
+
   formData.value.roomID = roomID
-  formData.value.roomNumber = roomNumber || roomID.split('-').pop() || ''
+  formData.value.roomNumber = roomNumber || ''
+  
+  // Auto-fill customer ID from current user
+  formData.value.customerID = getCurrentUserId()
   
   if (checkIn) {
     formData.value.checkInDate = checkIn
@@ -259,7 +271,8 @@ const initializeForm = () => {
   if (checkOut) {
     formData.value.checkOutDate = checkOut
   }
-}
+} 
+
 
 const handleSubmit = async () => {
   // Validate check-out date
