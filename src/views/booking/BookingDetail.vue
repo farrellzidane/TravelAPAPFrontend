@@ -54,6 +54,14 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-2">
+              <!-- Write Review Button (for customers with completed bookings) -->
+              <button
+                v-if="canWriteReview"
+                @click="handleWriteReview"
+                class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow transition"
+              >
+                Write Review
+              </button>
               <!-- Removed: Refund button as refund feature removed -->
               <!--
               <button
@@ -580,6 +588,24 @@ const processingAction = ref(false)
 const isCustomer = computed(() => {
   return getCurrentRole() === 'CUSTOMER'
 })
+
+const canWriteReview = computed(() => {
+  if (!booking.value || !isCustomer.value) return false
+  
+  // Only allow review for completed bookings (status = 1)
+  if (booking.value.status !== 1) return false
+  
+  // Check if checkout date has passed
+  const checkoutDate = new Date(booking.value.checkOutDate)
+  const now = new Date()
+  
+  return now > checkoutDate
+})
+
+const handleWriteReview = () => {
+  if (!booking.value) return
+  router.push({ name: 'CreateReview', params: { bookingId: booking.value.bookingID } })
+}
 
 const fetchBookingDetail = async () => {
   loading.value = true

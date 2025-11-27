@@ -18,6 +18,10 @@ import CreateTopUp from '../views/topup/CreateTopUp.vue'
 import TopUpDetail from '../views/topup/TopUpDetail.vue'
 import PaymentMethodView from '../views/paymentmethod/PaymentMethodView.vue'
 import CreatePaymentMethod from '../views/paymentmethod/CreatePaymentMethod.vue'
+import PropertyReviewsView from '../views/review/PropertyReviewsView.vue'
+import CustomerReviewsView from '../views/review/CustomerReviewsView.vue'
+import ReviewDetail from '../views/review/ReviewDetail.vue'
+import CreateReview from '../views/review/CreateReview.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -136,6 +140,48 @@ const router = createRouter({
         if (role === 'CUSTOMER') {
           toast.error('Access Denied', {
             description: 'Customer tidak memiliki akses ke halaman Payment Method'
+          })
+          next('/')
+        } else {
+          next()
+        }
+      }
+    },
+    {
+      path: '/reviews/property/:propertyId',
+      name: 'PropertyReviews',
+      component: PropertyReviewsView,
+    },
+    {
+      path: '/reviews/customer',
+      name: 'CustomerReviews',
+      component: CustomerReviewsView,
+      beforeEnter: (to, from, next) => {
+        const role = getCurrentRole()
+        if (role !== 'CUSTOMER') {
+          toast.error('Access Denied', {
+            description: 'Only customers can access this page'
+          })
+          next('/')
+        } else {
+          next()
+        }
+      }
+    },
+    {
+      path: '/reviews/:id',
+      name: 'ReviewDetail',
+      component: ReviewDetail,
+    },
+    {
+      path: '/reviews/create/:bookingId',
+      name: 'CreateReview',
+      component: CreateReview,
+      beforeEnter: (to, from, next) => {
+        const role = getCurrentRole()
+        if (role !== 'CUSTOMER') {
+          toast.error('Access Denied', {
+            description: 'Only customers can create reviews'
           })
           next('/')
         } else {

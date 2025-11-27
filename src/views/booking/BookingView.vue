@@ -38,8 +38,9 @@
             </div>
           </div>
 
-          <!-- Right: Add Button -->
+          <!-- Right: Add Button (only for CUSTOMER) -->
           <button
+            v-if="isCustomer"
             @click="goToCreateBooking"
             class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition flex items-center gap-2 whitespace-nowrap"
           >
@@ -189,9 +190,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBookingStore } from '@/stores/booking/booking.stores'
+import { getCurrentRole } from '@/config/axios.config'
 import type { BookingFilter } from '@/interfaces/booking.interface'
 
 const router = useRouter()
@@ -205,6 +207,9 @@ const filter = ref<BookingFilter>({
   status: 'all',
   search: ''
 })
+
+// Only CUSTOMER can create bookings
+const isCustomer = computed(() => getCurrentRole() === 'CUSTOMER')
 
 const loadBookings = async () => {
   loading.value = true

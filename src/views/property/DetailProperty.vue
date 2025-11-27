@@ -54,26 +54,35 @@
               </span>
             </div>
 
-            <!-- Action Buttons (only show if active) -->
-            <div v-if="property.activeStatus === 1" class="flex flex-wrap gap-2">
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-2">
               <button
-                @click="handleAddRoom"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition"
+                @click="handleViewReviews"
+                class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow transition"
               >
-                Add Room
+                View Reviews
               </button>
-              <button
-                @click="handleUpdateProperty"
-                class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg shadow transition"
-              >
-                Update Property
-              </button>
-              <button
-                @click="showDeleteModal = true"
-                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow transition"
-              >
-                Delete Property
-              </button>
+              <!-- Management Buttons (only show if active and user has permission) -->
+              <template v-if="property.activeStatus === 1 && canManageProperty">
+                <button
+                  @click="handleAddRoom"
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition"
+                >
+                  Add Room
+                </button>
+                <button
+                  @click="handleUpdateProperty"
+                  class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg shadow transition"
+                >
+                  Update Property
+                </button>
+                <button
+                  @click="showDeleteModal = true"
+                  class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow transition"
+                >
+                  Delete Property
+                </button>
+              </template>
             </div>
           </div>
 
@@ -550,6 +559,9 @@ const isSuperAdmin = computed(() => currentRole.value === 'SUPERADMIN')
 const isAccommodationOwner = computed(() => currentRole.value === 'ACCOMMODATION_OWNER')
 const isCustomer = computed(() => currentRole.value === 'CUSTOMER')
 
+// Customer cannot manage property (update, delete, add room)
+const canManageProperty = computed(() => isSuperAdmin.value || isAccommodationOwner.value)
+
 const today = computed(() => {
   return new Date().toISOString().split('T')[0]
 })
@@ -695,6 +707,10 @@ const getRoomDisplayStatus = (room: Room): { name: string, status: number } => {
     name: 'Available',
     status: 1
   }
+}
+
+const handleViewReviews = () => {
+  router.push(`/reviews/property/${property.value?.propertyID}`)
 }
 
 const handleAddRoom = () => {
