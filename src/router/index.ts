@@ -197,4 +197,12 @@ const router = createRouter({
   ],
 })
 
+
+// router.beforeEach((to, from, next) => {
+//   const token = getToken();
+//   if (!token) {
+//     redirectToLogin();
+//   }
+//   next();
+// });
 export default router

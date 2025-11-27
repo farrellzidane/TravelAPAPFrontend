@@ -5,9 +5,24 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const base = mode === 'production' ? '/accomodation-service/' : '/'
+
+  const isIntegrate = mode === 'integrate'
+  const isProduction = mode === 'production'
+
+  const base = (isProduction || isIntegrate) ? '/accommodation-service/' : '/'
+
+  const serverConfig = isIntegrate 
+    ? {
+        host: '0.0.0.0',
+        port: 5173,
+        strictPort: true,
+        hmr: {
+          clientPort: 80,
+          path: "/accommodation-service/",
+        }
+      }
+    : undefined
 
   return {
     base,
@@ -21,6 +36,6 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       },
     },
+    server: serverConfig
   }
 })
-
