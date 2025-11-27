@@ -99,13 +99,13 @@
               <select
                 v-model.number="formData.province"
                 required
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                :disabled="loadingProvinces"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               >
-                <option value="1">DKI Jakarta</option>
-                <option value="2">Jawa Barat</option>
-                <option value="3">Jawa Tengah</option>
-                <option value="4">Jawa Timur</option>
-                <option value="5">Bali</option>
+                <option value="" disabled>{{ loadingProvinces ? 'Loading provinces...' : 'Select Province' }}</option>
+                <option v-for="province in provinces" :key="province.code" :value="parseInt(province.code)">
+                  {{ province.name }}
+                </option>
               </select>
             </div>
 
@@ -301,7 +301,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import type { Property, UpdatePropertyRequest } from '@/interfaces/property.interface'
+import type { Property, UpdatePropertyRequest, Province } from '@/interfaces/property.interface'
 import type { UpdateRoomTypeForm } from '@/interfaces/room.interface'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
@@ -313,6 +313,8 @@ const propertyStore = usePropertyStore()
 const property = ref<Property | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
+const loadingProvinces = ref(false)
+const provinces = ref<Province[]>([])
 
 const formData = ref<{
   propertyID: string
@@ -329,12 +331,24 @@ const formData = ref<{
   propertyName: '',
   type: 1,
   address: '',
-  province: 1,
+  province: 31,
   description: '',
   ownerID: '',
   ownerName: '',
   roomTypes: []
 })
+
+const fetchProvinces = async () => {
+  loadingProvinces.value = true
+  try {
+    provinces.value = await propertyService.getProvinces()
+  } catch (error) {
+    console.error('Error fetching provinces:', error)
+    toast.warning('Using fallback provinces list')
+  } finally {
+    loadingProvinces.value = false
+  }
+}
 
 const fetchPropertyDetail = async () => {
   loading.value = true
@@ -503,6 +517,7 @@ const goBack = () => {
 }
 
 onMounted(() => {
+  fetchProvinces()
   fetchPropertyDetail()
 })
 </script>
