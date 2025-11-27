@@ -72,6 +72,69 @@
               />
             </div>
 
+            <!-- Property Type -->
+            <div>
+              <label class="block text-sm font-medium text-blue-700 mb-2">
+                Property Type <span class="text-red-500">*</span>
+              </label>
+              <select
+                v-model.number="formData.type"
+                required
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="1">Hotel</option>
+                <option value="2">Villa</option>
+                <option value="3">Apartemen</option>
+              </select>
+              <p class="mt-1 text-xs text-gray-500">
+                Note: Changing property type will affect new room types, but existing room types will be preserved.
+              </p>
+            </div>
+
+            <!-- Province -->
+            <div>
+              <label class="block text-sm font-medium text-blue-700 mb-2">
+                Province <span class="text-red-500">*</span>
+              </label>
+              <select
+                v-model.number="formData.province"
+                required
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="1">DKI Jakarta</option>
+                <option value="2">Jawa Barat</option>
+                <option value="3">Jawa Tengah</option>
+                <option value="4">Jawa Timur</option>
+                <option value="5">Bali</option>
+              </select>
+            </div>
+
+            <!-- Owner ID (Disabled) -->
+            <div>
+              <label class="block text-sm font-medium text-blue-700 mb-2">
+                Owner ID
+              </label>
+              <input
+                v-model="formData.ownerID"
+                type="text"
+                disabled
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+              />
+            </div>
+
+            <!-- Owner Name (Disabled) -->
+            <div>
+              <label class="block text-sm font-medium text-blue-700 mb-2">
+                Owner Name
+              </label>
+              <input
+                v-model="formData.ownerName"
+                type="text"
+                disabled
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+              />
+            </div>
+
             <!-- Address -->
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-blue-700 mb-2">
@@ -254,14 +317,22 @@ const error = ref<string | null>(null)
 const formData = ref<{
   propertyID: string
   propertyName: string
+  type: number
   address: string
+  province: number
   description: string
+  ownerID: string
+  ownerName: string
   roomTypes: UpdateRoomTypeForm[]
 }>({
   propertyID: '',
   propertyName: '',
+  type: 1,
   address: '',
+  province: 1,
   description: '',
+  ownerID: '',
+  ownerName: '',
   roomTypes: []
 })
 
@@ -277,8 +348,12 @@ const fetchPropertyDetail = async () => {
     formData.value = {
       propertyID: property.value.propertyID,
       propertyName: property.value.propertyName,
+      type: property.value.type,
       address: property.value.address,
+      province: property.value.province,
       description: property.value.description,
+      ownerID: property.value.ownerID,
+      ownerName: property.value.ownerName,
       roomTypes: property.value.roomTypes?.map(rt => ({
         roomTypeID: rt.roomTypeID,
         roomTypeName: rt.roomTypeName,
@@ -363,7 +438,9 @@ const handleSubmit = async () => {
     const requestData: UpdatePropertyRequest = {
       propertyID: formData.value.propertyID,
       propertyName: formData.value.propertyName,
+      type: formData.value.type,
       address: formData.value.address,
+      province: formData.value.province,
       description: formData.value.description,
       roomTypes: formData.value.roomTypes.map(rt => ({
         roomTypeID: rt.roomTypeID,
@@ -396,7 +473,9 @@ const handleBack = () => {
 
   const hasChanges =
     formData.value.propertyName !== property.value.propertyName ||
+    formData.value.type !== property.value.type ||
     formData.value.address !== property.value.address ||
+    formData.value.province !== property.value.province ||
     formData.value.description !== property.value.description ||
     JSON.stringify(formData.value.roomTypes) !== JSON.stringify(
       property.value.roomTypes?.map(rt => ({

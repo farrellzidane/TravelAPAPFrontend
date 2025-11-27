@@ -81,7 +81,9 @@ export interface CreatePropertyRequest {
 export interface UpdatePropertyRequest {
   propertyID: string
   propertyName: string
+  type: number
   address: string
+  province: number
   description: string
   roomTypes: Array<{
     roomTypeID: string
