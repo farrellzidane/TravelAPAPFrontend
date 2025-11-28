@@ -22,6 +22,7 @@ import PropertyReviewsView from '../views/review/PropertyReviewsView.vue'
 import CustomerReviewsView from '../views/review/CustomerReviewsView.vue'
 import ReviewDetail from '../views/review/ReviewDetail.vue'
 import CreateReview from '../views/review/CreateReview.vue'
+import { getToken, redirectToLogin } from '@/lib/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -198,11 +199,11 @@ const router = createRouter({
 })
 
 
-// router.beforeEach((to, from, next) => {
-//   const token = getToken();
-//   if (!token) {
-//     redirectToLogin();
-//   }
-//   next();
-// });
+router.beforeEach((to, from, next) => {
+  const token = getToken();
+  if (!token) {
+    redirectToLogin();
+  }
+  next();
+});
 export default router

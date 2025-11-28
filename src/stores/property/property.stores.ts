@@ -5,6 +5,7 @@ import { defineStore } from 'pinia'
 import axios, { type AxiosResponse } from "axios";
 import { toast } from 'vue-sonner';
 import { useRouter } from 'vue-router';
+import api from '@/lib/safe.api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -46,7 +47,7 @@ export const usePropertyStore = defineStore('property', {
 
       try {
         const response: AxiosResponse<CommonResponseInterface<Property[]>> = 
-          await axios.get(`${API_BASE_URL}/api/property`)
+          await api.get(`${API_BASE_URL}/api/property`)
 
         if (response.data.status === 200 && response.data.data) {
           this.properties = response.data.data
@@ -81,7 +82,7 @@ export const usePropertyStore = defineStore('property', {
         if (this.filters.province) params.province = this.filters.province
 
         const response: AxiosResponse<CommonResponseInterface<Property[]>> = 
-          await axios.get(`${API_BASE_URL}/api/property`, { params })
+          await api.get(`${API_BASE_URL}/api/property`, { params })
 
         if (response.data.status === 200 && response.data.data) {
           this.properties = response.data.data
@@ -104,7 +105,7 @@ export const usePropertyStore = defineStore('property', {
 
       try {
         const response: AxiosResponse<CommonResponseInterface<Property>> = 
-          await axios.get(`${API_BASE_URL}/api/property/view/${id}`)
+          await api.get(`${API_BASE_URL}/api/property/view/${id}`)
 
         if (response.data.status === 200 && response.data.data) {
           this.currentProperty = response.data.data
@@ -131,7 +132,7 @@ export const usePropertyStore = defineStore('property', {
         console.log('Sending create property request:', data)
         
         const response: AxiosResponse<CommonResponseInterface<Property>> = 
-          await axios.post(`${API_BASE_URL}/api/property/create`, data)
+          await api.post(`${API_BASE_URL}/api/property/create`, data)
 
         console.log('Create property response:', response.data)
 
@@ -174,7 +175,7 @@ export const usePropertyStore = defineStore('property', {
         console.log('Updating property:', id, data)
         
         const response: AxiosResponse<CommonResponseInterface<Property>> = 
-          await axios.put(`${API_BASE_URL}/api/property/update/${id}`, data)
+          await api.put(`${API_BASE_URL}/api/property/update/${id}`, data)
 
         console.log('Update property response:', response.data)
 
@@ -221,7 +222,7 @@ export const usePropertyStore = defineStore('property', {
         console.log('Soft deleting property:', id)
         
         const response: AxiosResponse<CommonResponseInterface<Property>> = 
-          await axios.delete(`${API_BASE_URL}/api/property/delete/${id}`)
+          await api.delete(`${API_BASE_URL}/api/property/delete/${id}`)
 
         console.log('Delete property response:', response.data)
 
@@ -266,7 +267,7 @@ export const usePropertyStore = defineStore('property', {
         console.log('Adding room types to property:', propertyId, data)
         
         const response: AxiosResponse<CommonResponseInterface<Property>> = 
-          await axios.post(`${API_BASE_URL}/api/property/updateroom`, data)
+          await api.post(`${API_BASE_URL}/api/property/updateroom`, data)
 
         console.log('Add room types response:', response.data)
 
