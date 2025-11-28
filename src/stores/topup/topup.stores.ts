@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 import axios, { type AxiosResponse } from 'axios'
 import { toast } from 'vue-sonner'
 import { useRouter } from 'vue-router'
+import api from '@/lib/safe.api'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -56,7 +57,7 @@ export const useTopUpStore = defineStore('topup', {
 
       try {
         const response: AxiosResponse<CommonResponseInterface<TopUpTransaction[]>> = 
-          await axios.get(`${API_BASE_URL}/api/top-up`)
+          await api.get(`${API_BASE_URL}/api/top-up`)
 
         if (response.data.status === 200 && response.data.data) {
           this.topUps = response.data.data.map(topUp => ({
@@ -90,7 +91,7 @@ export const useTopUpStore = defineStore('topup', {
 
       try {
         const response: AxiosResponse<CommonResponseInterface<TopUpTransaction>> = 
-          await axios.get(`${API_BASE_URL}/api/top-up/${id}`)
+          await api.get(`${API_BASE_URL}/api/top-up/${id}`)
 
         if (response.data.status === 200 && response.data.data) {
           this.currentTopUp = {
@@ -118,7 +119,7 @@ export const useTopUpStore = defineStore('topup', {
 
       try {
         const response: AxiosResponse<CommonResponseInterface<TopUpTransaction>> = 
-          await axios.post(`${API_BASE_URL}/api/top-up`, data)
+          await api.post(`${API_BASE_URL}/api/top-up`, data)
 
         if ((response.data.status === 200 || response.data.status === 201) && response.data.data) {
           const newTopUp = {
@@ -150,7 +151,7 @@ export const useTopUpStore = defineStore('topup', {
 
       try {
         const response: AxiosResponse<CommonResponseInterface<TopUpTransaction>> = 
-          await axios.put(`${API_BASE_URL}/api/top-up/status`, data)
+          await api.put(`${API_BASE_URL}/api/top-up/status`, data)
 
         if (response.data.status === 200 && response.data.data) {
           const updatedTopUp = {
@@ -189,7 +190,7 @@ export const useTopUpStore = defineStore('topup', {
 
       try {
         const response: AxiosResponse<CommonResponseInterface<TopUpTransaction>> = 
-          await axios.delete(`${API_BASE_URL}/api/top-up/${id}`)
+          await api.delete(`${API_BASE_URL}/api/top-up/${id}`)
 
         if (response.data.status === 200) {
           this.topUps = this.topUps.filter(t => t.transactionId !== id)

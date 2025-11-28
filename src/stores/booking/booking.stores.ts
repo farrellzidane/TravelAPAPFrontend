@@ -4,6 +4,7 @@ import axios, { type AxiosResponse } from 'axios'
 import { toast } from 'vue-sonner'
 import type { Booking, CreateBookingRequest, BookingFilter } from '@/interfaces/booking.interface'
 import type { CommonResponseInterface } from '@/interfaces/common.response.interface'
+import api from '@/lib/safe.api'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -34,7 +35,7 @@ export const useBookingStore = defineStore('booking', () => {
         url += `?${params.toString()}`
       }
 
-      const response: AxiosResponse<CommonResponseInterface<Booking[]>> = await axios.get(url)
+      const response: AxiosResponse<CommonResponseInterface<Booking[]>> = await api.get(url)
 
       console.log('Fetch bookings response:', response.data)
 
@@ -69,7 +70,7 @@ export const useBookingStore = defineStore('booking', () => {
       console.log('Fetching booking by ID:', bookingId)
 
       const response: AxiosResponse<CommonResponseInterface<Booking>> = 
-        await axios.get(`${API_BASE_URL}/api/bookings/${bookingId}`)
+        await api.get(`${API_BASE_URL}/api/bookings/${bookingId}`)
 
       console.log('Fetch booking response:', response.data)
 
@@ -104,7 +105,7 @@ export const useBookingStore = defineStore('booking', () => {
       console.log('Creating booking:', data)
 
       const response: AxiosResponse<CommonResponseInterface<Booking>> = 
-        await axios.post(`${API_BASE_URL}/api/bookings/create`, data)
+        await api.post(`${API_BASE_URL}/api/bookings/create`, data)
 
       console.log('Create booking response:', response.data)
 
@@ -143,7 +144,7 @@ export const useBookingStore = defineStore('booking', () => {
       console.log('Confirming payment for booking:', bookingId)
 
       const response: AxiosResponse<CommonResponseInterface<Booking>> = 
-        await axios.post(`${API_BASE_URL}/api/bookings/status/pay`, { bookingID: bookingId })
+        await api.post(`${API_BASE_URL}/api/bookings/status/pay`, { bookingID: bookingId })
 
       console.log('Payment confirmation response:', response.data)
 
@@ -179,7 +180,7 @@ export const useBookingStore = defineStore('booking', () => {
       console.log('Cancelling booking:', bookingId)
 
       const response: AxiosResponse<CommonResponseInterface<Booking>> = 
-        await axios.post(`${API_BASE_URL}/api/bookings/status/cancel`, { bookingID: bookingId })
+        await api.post(`${API_BASE_URL}/api/bookings/status/cancel`, { bookingID: bookingId })
 
       console.log('Cancel booking response:', response.data)
 
@@ -217,7 +218,7 @@ export const useBookingStore = defineStore('booking', () => {
       console.log('Requesting refund for booking:', bookingId)
 
       const response: AxiosResponse<CommonResponseInterface<Booking>> = 
-        await axios.post(`${API_BASE_URL}/api/bookings/status/refund`, { bookingID: bookingId })
+        await api.post(`${API_BASE_URL}/api/bookings/status/refund`, { bookingID: bookingId })
 
       console.log('Refund request response:', response.data)
 

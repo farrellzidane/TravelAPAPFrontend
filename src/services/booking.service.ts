@@ -1,5 +1,6 @@
 import axios, { type AxiosResponse } from 'axios'
 import type { Booking, CreateBookingRequest, BookingFilter, CreateBookingWithoutRoomRequest, UpdateBookingRequest } from '@/interfaces/booking.interface'
+import api from '@/lib/safe.api'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -31,7 +32,7 @@ export const bookingService = {
       
       console.log('Request URL:', url)
       
-      const response: AxiosResponse<ApiResponse<Booking[]>> = await axios.get(url)
+      const response: AxiosResponse<ApiResponse<Booking[]>> = await api.get(url)
       
       console.log('Get all bookings response:', response.data)
       
@@ -52,7 +53,7 @@ export const bookingService = {
       console.log('Fetching booking by ID:', bookingId)
       
       const response: AxiosResponse<ApiResponse<Booking>> = 
-        await axios.get(`${API_BASE_URL}/api/bookings/${bookingId}`)
+        await api.get(`${API_BASE_URL}/api/bookings/${bookingId}`)
       
       console.log('Get booking response:', response.data)
       
@@ -73,7 +74,7 @@ export const bookingService = {
       console.log('Creating booking:', data)
       
       const response: AxiosResponse<ApiResponse<Booking>> = 
-        await axios.post(`${API_BASE_URL}/api/bookings/create`, data)
+        await api.post(`${API_BASE_URL}/api/bookings/create`, data)
       
       console.log('Create booking response:', response.data)
       
@@ -94,7 +95,7 @@ export const bookingService = {
       console.log('Updating booking:', data)
       
       const response: AxiosResponse<ApiResponse<Booking>> = 
-        await axios.put(`${API_BASE_URL}/api/bookings/update`, data)
+        await api.put(`${API_BASE_URL}/api/bookings/update`, data)
       
       console.log('Update booking response:', response.data)
       
@@ -115,7 +116,7 @@ export const bookingService = {
       console.log('Paying booking:', bookingId)
       
       const response: AxiosResponse<ApiResponse<Booking>> = 
-        await axios.put(`${API_BASE_URL}/api/bookings/${bookingId}/payment-confirm`)
+        await api.put(`${API_BASE_URL}/api/bookings/${bookingId}/payment-confirm`)
       
       console.log('Pay booking response:', response.data)
       
@@ -136,7 +137,7 @@ export const bookingService = {
       console.log('Cancelling booking:', bookingId)
       
       const response: AxiosResponse<ApiResponse<Booking>> = 
-        await axios.put(`${API_BASE_URL}/api/bookings/${bookingId}/cancel`)
+        await api.put(`${API_BASE_URL}/api/bookings/${bookingId}/cancel`)
       
       console.log('Cancel booking response:', response.data)
       
@@ -159,7 +160,7 @@ export const bookingService = {
       console.log('Requesting refund for booking:', bookingId)
       
       const response: AxiosResponse<ApiResponse<Booking>> = 
-        await axios.put(`${API_BASE_URL}/api/bookings/${bookingId}/refund`)
+        await api.put(`${API_BASE_URL}/api/bookings/${bookingId}/refund`)
       
       console.log('Request refund response:', response.data)
       

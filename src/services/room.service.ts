@@ -1,5 +1,6 @@
 import axios, { type AxiosResponse } from 'axios'
 import type { Room, CreateMaintenanceRequest } from '@/interfaces/room.interface'
+import api from '@/lib/safe.api'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -16,7 +17,7 @@ export const roomService = {
       console.log('Creating maintenance:', data)
       
       const response: AxiosResponse<ApiResponse<Room>> = 
-        await axios.post(`${API_BASE_URL}/api/property/maintenance/add`, data)
+        await api.post(`${API_BASE_URL}/api/property/maintenance/add`, data)
       
       console.log('Create maintenance response:', response.data)
       

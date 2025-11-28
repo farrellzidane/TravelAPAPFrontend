@@ -3,6 +3,7 @@ import type { CommonResponseInterface } from '@/interfaces/common.response.inter
 import { defineStore } from 'pinia'
 import axios, { type AxiosResponse } from 'axios'
 import { toast } from 'vue-sonner'
+import api from '@/lib/safe.api'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -53,7 +54,7 @@ export const usePaymentMethodStore = defineStore('paymentMethod', {
 
       try {
         const response: AxiosResponse<CommonResponseInterface<PaymentMethod[]>> = 
-          await axios.get(`${API_BASE_URL}/api/payment-method`)
+          await api.get(`${API_BASE_URL}/api/payment-method`)
 
         if (response.data.status === 200 && response.data.data) {
           this.paymentMethods = response.data.data.map(pm => ({
@@ -87,7 +88,7 @@ export const usePaymentMethodStore = defineStore('paymentMethod', {
 
       try {
         const response: AxiosResponse<CommonResponseInterface<PaymentMethod>> = 
-          await axios.post(`${API_BASE_URL}/api/payment-method`, data)
+          await api.post(`${API_BASE_URL}/api/payment-method`, data)
 
         if ((response.data.status === 200 || response.data.status === 201) && response.data.data) {
           const newPaymentMethod = {
@@ -119,7 +120,7 @@ export const usePaymentMethodStore = defineStore('paymentMethod', {
 
       try {
         const response: AxiosResponse<CommonResponseInterface<PaymentMethod>> = 
-          await axios.put(`${API_BASE_URL}/api/payment-method/status`, data)
+          await api.put(`${API_BASE_URL}/api/payment-method/status`, data)
 
         if (response.data.status === 200 && response.data.data) {
           const updatedPaymentMethod = {
@@ -154,7 +155,7 @@ export const usePaymentMethodStore = defineStore('paymentMethod', {
 
       try {
         const response: AxiosResponse<CommonResponseInterface<PaymentMethod>> = 
-          await axios.delete(`${API_BASE_URL}/api/payment-method/delete/${id}`)
+          await api.delete(`${API_BASE_URL}/api/payment-method/delete/${id}`)
 
         if (response.data.status === 200) {
           this.paymentMethods = this.paymentMethods.filter(pm => pm.paymentMethodId !== id)

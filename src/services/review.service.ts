@@ -1,6 +1,7 @@
 import axios, { type AxiosResponse } from 'axios'
 import type { CommonResponseInterface } from '@/interfaces/common.response.interface'
 import type { Review, CreateReviewRequest } from '@/interfaces/review.interface'
+import api from '@/lib/safe.api'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -9,7 +10,7 @@ export const reviewService = {
   async getReviewsByProperty(propertyID: string): Promise<Review[]> {
     try {
       const response: AxiosResponse<CommonResponseInterface<Review[]>> = 
-        await axios.get(`${API_BASE_URL}/api/reviews/property/${propertyID}`)
+        await api.get(`${API_BASE_URL}/api/reviews/property/${propertyID}`)
       return response.data.data
     } catch (error: any) {
       console.error('Error fetching reviews by property:', error)
@@ -21,7 +22,7 @@ export const reviewService = {
   async getReviewsByCustomer(): Promise<Review[]> {
     try {
       const response: AxiosResponse<CommonResponseInterface<Review[]>> = 
-        await axios.get(`${API_BASE_URL}/api/reviews/customer`)
+        await api.get(`${API_BASE_URL}/api/reviews/customer`)
       return response.data.data
     } catch (error: any) {
       console.error('Error fetching reviews by customer:', error)
@@ -33,7 +34,7 @@ export const reviewService = {
   async getReviewById(reviewID: string): Promise<Review> {
     try {
       const response: AxiosResponse<CommonResponseInterface<Review>> = 
-        await axios.get(`${API_BASE_URL}/api/reviews/${reviewID}`)
+        await api.get(`${API_BASE_URL}/api/reviews/${reviewID}`)
       return response.data.data
     } catch (error: any) {
       console.error('Error fetching review by ID:', error)
@@ -45,7 +46,7 @@ export const reviewService = {
   async createReview(request: CreateReviewRequest): Promise<Review> {
     try {
       const response: AxiosResponse<CommonResponseInterface<Review>> = 
-        await axios.post(`${API_BASE_URL}/api/reviews/create`, request)
+        await api.post(`${API_BASE_URL}/api/reviews/create`, request)
       return response.data.data
     } catch (error: any) {
       console.error('Error creating review:', error)

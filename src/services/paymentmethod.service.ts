@@ -1,5 +1,6 @@
 import axios, { type AxiosResponse } from 'axios'
 import type { PaymentMethod, CreatePaymentMethodRequest, UpdatePaymentMethodStatusRequest, ApiResponse } from '@/interfaces/paymentmethod.interface'
+import api from '@/lib/safe.api'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -7,7 +8,7 @@ export const paymentMethodService = {
   async getAllPaymentMethods(): Promise<PaymentMethod[]> {
     try {
       const response: AxiosResponse<ApiResponse<PaymentMethod[]>> = 
-        await axios.get(`${API_BASE_URL}/api/payment-method`)
+        await api.get(`${API_BASE_URL}/api/payment-method`)
       
       return response.data.data || []
     } catch (error) {
@@ -21,7 +22,7 @@ export const paymentMethodService = {
       console.log('Creating payment method with data:', data)
       
       const response: AxiosResponse<ApiResponse<PaymentMethod>> = 
-        await axios.post(`${API_BASE_URL}/api/payment-method`, data)
+        await api.post(`${API_BASE_URL}/api/payment-method`, data)
       
       console.log('Create payment method response:', response.data)
       
@@ -42,7 +43,7 @@ export const paymentMethodService = {
       console.log('Updating payment method status:', data)
       
       const response: AxiosResponse<ApiResponse<PaymentMethod>> = 
-        await axios.put(`${API_BASE_URL}/api/payment-method/status`, data)
+        await api.put(`${API_BASE_URL}/api/payment-method/status`, data)
       
       console.log('Update payment method status response:', response.data)
       
@@ -63,7 +64,7 @@ export const paymentMethodService = {
       console.log('Deleting payment method:', id)
       
       const response: AxiosResponse<ApiResponse<PaymentMethod>> = 
-        await axios.delete(`${API_BASE_URL}/api/payment-method/delete/${id}`)
+        await api.delete(`${API_BASE_URL}/api/payment-method/delete/${id}`)
       
       console.log('Delete payment method response:', response.data)
       

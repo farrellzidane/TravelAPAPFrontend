@@ -4,6 +4,7 @@ import axios, { type AxiosResponse } from 'axios'
 import { toast } from 'vue-sonner'
 import type { Room, CreateMaintenanceRequest } from '@/interfaces/room.interface'
 import type { CommonResponseInterface } from '@/interfaces/common.response.interface'
+import api from '@/lib/safe.api'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -19,7 +20,7 @@ export const useRoomStore = defineStore('room', () => {
       console.log('Creating maintenance:', data)
       
       const response: AxiosResponse<CommonResponseInterface<Room>> = 
-        await axios.post(`${API_BASE_URL}/api/property/maintenance/add`, data)
+        await api.post(`${API_BASE_URL}/api/property/maintenance/add`, data)
 
       console.log('Create maintenance response:', response.data)
 

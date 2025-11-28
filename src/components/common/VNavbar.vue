@@ -57,7 +57,7 @@
           </router-link>
 
           <!-- Role Switcher -->
-          <div class="relative">
+          <!-- <div class="relative">
             <select
               v-model="currentRole"
               @change="switchRole"
@@ -67,7 +67,7 @@
               <option value="ACCOMMODATION_OWNER">Owner</option>
               <option value="CUSTOMER">Customer</option>
             </select>
-          </div>
+          </div> -->
         </div>
 
         <!-- Mobile Menu Button -->
@@ -148,7 +148,7 @@
           </router-link>
 
           <!-- Mobile Role Switcher -->
-          <div class="px-4 py-2">
+          <!-- <div class="px-4 py-2">
             <label class="block text-xs text-gray-500 mb-1">Role:</label>
             <select
               v-model="currentRole"
@@ -159,7 +159,7 @@
               <option value="ACCOMMODATION_OWNER">🏨 Owner</option>
               <option value="CUSTOMER">👤 Customer</option>
             </select>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -186,26 +186,26 @@ const closeMobileMenu = () => {
   mobileMenuOpen.value = false
 }
 
-const switchRole = () => {
-  setUserRole(currentRole.value as any)
+// const switchRole = () => {
+//   setUserRole(currentRole.value as any)
   
-  const roleNames: Record<string, string> = {
-    'SUPERADMIN': 'Superadmin',
-    'ACCOMMODATION_OWNER': 'Accommodation Owner',
-    'CUSTOMER': 'Customer'
-  }
+//   const roleNames: Record<string, string> = {
+//     'SUPERADMIN': 'Superadmin',
+//     'ACCOMMODATION_OWNER': 'Accommodation Owner',
+//     'CUSTOMER': 'Customer'
+//   }
   
-  toast.success(`Role switched to ${roleNames[currentRole.value]}`, {
-    description: 'Page will reload to apply changes'
-  })
+//   toast.success(`Role switched to ${roleNames[currentRole.value]}`, {
+//     description: 'Page will reload to apply changes'
+//   })
   
-  // Reload page to apply new role
-  setTimeout(() => {
-    window.location.reload()
-  }, 1000)
-}
+//   // Reload page to apply new role
+//   setTimeout(() => {
+//     window.location.reload()
+//   }, 1000)
+// }
 
-onMounted(() => {
-  currentRole.value = getCurrentRole()
-})
+// onMounted(() => {
+//   currentRole.value = getCurrentRole()
+// })
 </script>

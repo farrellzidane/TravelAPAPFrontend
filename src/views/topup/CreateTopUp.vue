@@ -135,9 +135,20 @@ const isSubmitting = ref(false)
 const errorMessage = ref('')
 
 const currentRole = computed(() => getCurrentRole())
-const isCustomer = computed(() => currentRole.value === 'CUSTOMER')
+const isCustomer = computed(() => {
+  const role = currentRole.value
+  // Check for both formats: 'CUSTOMER' from localStorage and 'Customer' from JWT
+  return role === 'CUSTOMER' || role === 'Customer'
+})
 
 onMounted(async () => {
+  // Redirect non-Customer users back to top-up list
+  if (!isCustomer.value) {
+    alert('Only customers can create top-up transactions')
+    router.push({ name: 'topup' })
+    return
+  }
+  
   // Auto-fill customer ID if user is customer
   if (isCustomer.value) {
     formData.customerId = MOCK_USER_IDS.CUSTOMER

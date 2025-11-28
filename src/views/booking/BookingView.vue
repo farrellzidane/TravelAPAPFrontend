@@ -78,9 +78,12 @@
         <div class="text-gray-400 text-6xl mb-4">📋</div>
         <h2 class="text-2xl font-semibold text-gray-700 mb-2">No Bookings Found</h2>
         <p class="text-gray-500 mb-6">
-          {{ filter.status !== 'all' || filter.search ? 'Try adjusting your filters' : 'Start by creating your first booking' }}
+          {{ filter.status !== 'all' || filter.search ? 'Try adjusting your filters' : isCustomer ? 'Start by creating your first booking' : 'No bookings available to display' }}
         </p>
+        
+        <!-- Create First Booking Button - Only for Customer -->
         <button
+          v-if="isCustomer"
           @click="goToCreateBooking"
           class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition"
         >
@@ -209,7 +212,11 @@ const filter = ref<BookingFilter>({
 })
 
 // Only CUSTOMER can create bookings
-const isCustomer = computed(() => getCurrentRole() === 'CUSTOMER')
+const isCustomer = computed(() => {
+  const role = getCurrentRole()
+  // Check for both formats: 'CUSTOMER' from localStorage and 'Customer' from JWT
+  return role === 'CUSTOMER' || role === 'Customer'
+})
 
 const loadBookings = async () => {
   loading.value = true

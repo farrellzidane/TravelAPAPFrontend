@@ -536,9 +536,10 @@ const handleBack = () => {
 onMounted(() => {
   // Check if user is customer
   const currentRole = getCurrentRole()
-  if (currentRole !== 'CUSTOMER') {
+  const isCustomer = currentRole === 'CUSTOMER' || currentRole === 'Customer'
+  if (!isCustomer) {
     toast.error('Only customers can create bookings')
-    router.push('/property')
+    router.push('/bookings')
     return
   }
   

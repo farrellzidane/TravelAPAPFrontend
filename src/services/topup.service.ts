@@ -1,5 +1,6 @@
 import axios, { type AxiosResponse } from 'axios'
 import type { TopUpTransaction, CreateTopUpRequest, UpdateTopUpStatusRequest, ApiResponse } from '@/interfaces/topup.interface'
+import api from '@/lib/safe.api'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -7,7 +8,7 @@ export const topUpService = {
   async getAllTopUps(): Promise<TopUpTransaction[]> {
     try {
       const response: AxiosResponse<ApiResponse<TopUpTransaction[]>> = 
-        await axios.get(`${API_BASE_URL}/api/top-up`)
+        await api.get(`${API_BASE_URL}/api/top-up`)
       
       return response.data.data || []
     } catch (error) {
@@ -19,7 +20,7 @@ export const topUpService = {
   async getTopUpById(id: string): Promise<TopUpTransaction> {
     try {
       const response: AxiosResponse<ApiResponse<TopUpTransaction>> = 
-        await axios.get(`${API_BASE_URL}/api/top-up/${id}`)
+        await api.get(`${API_BASE_URL}/api/top-up/${id}`)
       
       return response.data.data
     } catch (error) {
@@ -33,7 +34,7 @@ export const topUpService = {
       console.log('Creating top-up with data:', data)
       
       const response: AxiosResponse<ApiResponse<TopUpTransaction>> = 
-        await axios.post(`${API_BASE_URL}/api/top-up`, data)
+        await api.post(`${API_BASE_URL}/api/top-up`, data)
       
       console.log('Create top-up response:', response.data)
       
@@ -54,7 +55,7 @@ export const topUpService = {
       console.log('Updating top-up status:', data)
       
       const response: AxiosResponse<ApiResponse<TopUpTransaction>> = 
-        await axios.put(`${API_BASE_URL}/api/top-up/status`, data)
+        await api.put(`${API_BASE_URL}/api/top-up/status`, data)
       
       console.log('Update top-up status response:', response.data)
       
@@ -75,7 +76,7 @@ export const topUpService = {
       console.log('Deleting top-up:', id)
       
       const response: AxiosResponse<ApiResponse<TopUpTransaction>> = 
-        await axios.delete(`${API_BASE_URL}/api/top-up/${id}`)
+        await api.delete(`${API_BASE_URL}/api/top-up/${id}`)
       
       console.log('Delete top-up response:', response.data)
       

@@ -40,11 +40,20 @@ function getTokenFromCookie(): string | null {
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
 
-  const fromStorage = window.localStorage.getItem(TOKEN_STORAGE_KEY);
-  if (fromStorage) return fromStorage;
+  let fromStorage = window.localStorage.getItem(TOKEN_STORAGE_KEY);
+  if (fromStorage) {
+    // Strip quotes from stored token if present
+    fromStorage = fromStorage.replace(/^"|"$/g, '');
+    // Update localStorage with cleaned token
+    if (fromStorage !== window.localStorage.getItem(TOKEN_STORAGE_KEY)) {
+      window.localStorage.setItem(TOKEN_STORAGE_KEY, fromStorage);
+    }
+    return fromStorage;
+  }
 
-  const fromCookie = getTokenFromCookie();
+  let fromCookie = getTokenFromCookie();
   if (fromCookie) {
+    fromCookie = fromCookie.replace(/^"|"$/g, '');
     window.localStorage.setItem(TOKEN_STORAGE_KEY, fromCookie);
     return fromCookie;
   }

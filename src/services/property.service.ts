@@ -1,6 +1,7 @@
 import axios, { type AxiosResponse } from 'axios'
 import type { Property, Province, CreatePropertyRequest, ApiResponse, DateFilter, UpdatePropertyRequest } from '@/interfaces/property.interface'
 import type { AddRoomTypeRequest } from '@/interfaces/room.interface'
+import api from '@/lib/safe.api'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 const WILAYAH_API = 'https://www.emsifa.com/api-wilayah-indonesia/api'
@@ -9,7 +10,7 @@ export const propertyService = {
   async getAllProperties(): Promise<Property[]> {
     try {
       const response: AxiosResponse<ApiResponse<Property[]>> = 
-        await axios.get(`${API_BASE_URL}/api/property`)
+        await api.get(`${API_BASE_URL}/api/property`)
       
       return response.data.data || []
     } catch (error) {
@@ -34,7 +35,7 @@ export const propertyService = {
       console.log('Fetching property detail from:', url)
       
       const response: AxiosResponse<ApiResponse<Property>> = 
-        await axios.get(url)
+        await api.get(url)
       
       console.log('Property detail response:', response.data)
       
@@ -50,7 +51,7 @@ export const propertyService = {
       console.log('Creating property with data:', data)
       
       const response: AxiosResponse<ApiResponse<Property>> = 
-        await axios.post(`${API_BASE_URL}/api/property/create`, data)
+        await api.post(`${API_BASE_URL}/api/property/create`, data)
       
       console.log('Create property response:', response.data)
       
@@ -71,7 +72,7 @@ export const propertyService = {
       console.log('Updating property with data:', data)
       
       const response: AxiosResponse<ApiResponse<Property>> = 
-        await axios.put(`${API_BASE_URL}/api/property/update/${id}`, data)
+        await api.put(`${API_BASE_URL}/api/property/update/${id}`, data)
       
       console.log('Update property response:', response.data)
       
@@ -92,7 +93,7 @@ export const propertyService = {
       console.log('Deleting property:', id)
       
       const response: AxiosResponse<ApiResponse<Property>> = 
-        await axios.delete(`${API_BASE_URL}/api/property/delete/${id}`)
+        await api.delete(`${API_BASE_URL}/api/property/delete/${id}`)
       
       console.log('Delete property response:', response.data)
       
@@ -113,7 +114,7 @@ export const propertyService = {
       console.log('Adding room types to property:', propertyId, data)
       
       const response: AxiosResponse<ApiResponse<Property>> = 
-        await axios.post(`${API_BASE_URL}/api/property/updateroom`, data)
+        await api.post(`${API_BASE_URL}/api/property/updateroom`, data)
       
       console.log('Add room types response:', response.data)
       
@@ -131,7 +132,7 @@ export const propertyService = {
 
   async getProvinces(): Promise<Province[]> {
     try {
-      const response = await axios.get(`${WILAYAH_API}/provinces.json`)
+      const response = await api.get(`${WILAYAH_API}/provinces.json`)
       
       return response.data.map((province: { id: string; name: string }) => ({
         code: province.id,

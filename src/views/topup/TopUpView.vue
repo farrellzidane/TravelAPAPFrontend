@@ -9,8 +9,10 @@
         </div>
 
         <!-- Action Section -->
-        <div class="mb-6" v-if="!isSuperAdmin">
+        <div class="mb-6">
+          <!-- New Top-Up Button - Only for Customer -->
           <button
+            v-if="isCustomer"
             @click="goToCreateTopUp"
             class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center gap-2"
           >
@@ -100,7 +102,13 @@ const statusFilter = ref('')
 
 // Role checking
 const currentRole = computed(() => getCurrentRole())
-const isSuperAdmin = computed(() => currentRole.value === 'SUPERADMIN')
+const isCustomer = computed(() => {
+  const role = currentRole.value
+  // Check for both formats: 'CUSTOMER' from localStorage and 'Customer' from JWT
+  return role === 'CUSTOMER' || role === 'Customer'
+})
+
+
 
 onMounted(async () => {
   await topUpStore.fetchAllTopUps()
