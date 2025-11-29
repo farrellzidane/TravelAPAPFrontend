@@ -164,12 +164,30 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                  <button
-                    @click="goToBookingDetail(booking.bookingID)"
-                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition"
-                  >
-                    Detail
-                  </button>
+                  <div class="flex items-center justify-center gap-2">
+                    <button
+                      @click="goToBookingDetail(booking.bookingID)"
+                      class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition"
+                    >
+                      Detail
+                    </button>
+                    <!-- Show View Review if booking already has a review -->
+                    <button
+                      v-if="booking.reviewID"
+                      @click="goToViewReview(booking.reviewID)"
+                      class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg shadow transition"
+                    >
+                      View Review
+                    </button>
+                    <!-- Show Create Review if booking can be reviewed and hasn't been reviewed yet -->
+                    <button
+                      v-else-if="canCreateReview(booking)"
+                      @click="goToCreateReview(booking.bookingID)"
+                      class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg shadow transition"
+                    >
+                      Create Review
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -273,6 +291,26 @@ const goToCreateBooking = () => {
 
 const goToBookingDetail = (bookingId: string) => {
   router.push(`/bookings/${bookingId}`)
+}
+
+const goToCreateReview = (bookingId: string) => {
+  router.push(`/reviews/create/${bookingId}`)
+}
+
+const goToViewReview = (reviewId: string) => {
+  router.push(`/reviews/${reviewId}`)
+}
+
+const canCreateReview = (booking: any): boolean => {
+  // Only show if status is Payment Confirmed (1) AND checkout date has passed AND no review exists
+  if (booking.status !== 1) return false
+  if (booking.reviewID) return false // Already has a review
+  
+  const checkoutDate = new Date(booking.checkOutDate)
+  const today = new Date()
+  
+  // Check if checkout date >= today
+  return checkoutDate <= today
 }
 
 onMounted(() => {

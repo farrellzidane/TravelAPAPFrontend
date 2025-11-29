@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { getCurrentRole } from '@/config/axios.config'
+import { getCurrentRole, isCustomer, isSuperAdmin } from '@/config/axios.config'
 import { toast } from 'vue-sonner'
 import HomeView from '../views/HomeView.vue'
 import PropertyView from '../views/property/PropertyView.vue'
@@ -100,8 +100,7 @@ const router = createRouter({
       name: 'create-topup',
       component: CreateTopUp,
       beforeEnter: (to, from, next) => {
-        const role = getCurrentRole()
-        if (role === 'SUPERADMIN') {
+        if (isSuperAdmin()) {
           toast.error('Access Denied', {
             description: 'Superadmin tidak dapat membuat top-up transaction'
           })
@@ -121,8 +120,7 @@ const router = createRouter({
       name: 'payment-method',
       component: PaymentMethodView,
       beforeEnter: (to, from, next) => {
-        const role = getCurrentRole()
-        if (role === 'CUSTOMER') {
+        if (isCustomer()) {
           toast.error('Access Denied', {
             description: 'Customer tidak memiliki akses ke halaman Payment Method'
           })
@@ -137,8 +135,7 @@ const router = createRouter({
       name: 'create-payment-method',
       component: CreatePaymentMethod,
       beforeEnter: (to, from, next) => {
-        const role = getCurrentRole()
-        if (role === 'CUSTOMER') {
+        if (isCustomer()) {
           toast.error('Access Denied', {
             description: 'Customer tidak memiliki akses ke halaman Payment Method'
           })
@@ -158,8 +155,7 @@ const router = createRouter({
       name: 'CustomerReviews',
       component: CustomerReviewsView,
       beforeEnter: (to, from, next) => {
-        const role = getCurrentRole()
-        if (role !== 'CUSTOMER') {
+        if (!isCustomer()) {
           toast.error('Access Denied', {
             description: 'Only customers can access this page'
           })
@@ -179,8 +175,7 @@ const router = createRouter({
       name: 'CreateReview',
       component: CreateReview,
       beforeEnter: (to, from, next) => {
-        const role = getCurrentRole()
-        if (role !== 'CUSTOMER') {
+        if (!isCustomer()) {
           toast.error('Access Denied', {
             description: 'Only customers can create reviews'
           })

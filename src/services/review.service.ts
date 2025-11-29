@@ -18,11 +18,11 @@ export const reviewService = {
     }
   },
 
-  // Get all reviews by customer (no parameter needed - gets current user's reviews)
-  async getReviewsByCustomer(): Promise<Review[]> {
+  // Get all reviews by customer ID
+  async getReviewsByCustomer(customerID: string): Promise<Review[]> {
     try {
       const response: AxiosResponse<CommonResponseInterface<Review[]>> = 
-        await api.get(`${API_BASE_URL}/api/reviews/customer`)
+        await api.get(`${API_BASE_URL}/api/reviews/customer/${customerID}`)
       return response.data.data
     } catch (error: any) {
       console.error('Error fetching reviews by customer:', error)

@@ -111,7 +111,7 @@
                 readonly
                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
               />
-              <p v-if="isSuperAdmin" class="mt-1 text-xs text-gray-500">
+              <p v-if="isSuperAdmin()" class="mt-1 text-xs text-gray-500">
                 Enter the UUID of the accommodation owner (e.g., xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
               </p>
             </div>

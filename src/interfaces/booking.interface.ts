@@ -29,6 +29,7 @@ export interface Booking {
   // canRefund?: boolean
   canCancel?: boolean
   breakfast: boolean
+  reviewID?: string // ID of the review if booking has been reviewed
 }
 
 export interface CreateBookingRequest {

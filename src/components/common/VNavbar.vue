@@ -48,12 +48,11 @@
             Statistic
           </router-link>
           <router-link
-            v-if="isCustomer"
             to="/reviews/customer"
             class="text-gray-700 hover:text-blue-600 font-medium transition"
             active-class="text-blue-600 font-semibold"
           >
-            My Reviews
+            My Review
           </router-link>
 
           <!-- Role Switcher -->
@@ -138,13 +137,12 @@
             Statistic
           </router-link>
           <router-link
-            v-if="isCustomer"
             to="/reviews/customer"
             @click="closeMobileMenu"
             class="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded transition"
             active-class="bg-blue-50 text-blue-600 font-semibold"
           >
-            My Reviews
+            My Review
           </router-link>
 
           <!-- Mobile Role Switcher -->
@@ -167,16 +165,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { setUserRole, getCurrentRole } from '@/config/axios.config'
-import { toast } from 'vue-sonner'
+import { ref } from 'vue'
 
 const mobileMenuOpen = ref(false)
-const currentRole = ref<string>('SUPERADMIN')
-
-const isCustomer = computed(() => {
-  return currentRole.value === 'CUSTOMER'
-})
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
