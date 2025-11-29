@@ -81,6 +81,7 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import axios from 'axios'
 import type { CommonResponseInterface } from '@/interfaces/common.response.interface'
+import api from '@/lib/safe.api'
 
 const router = useRouter()
 
@@ -102,12 +103,12 @@ const fetchStatistics = async () => {
   isLoading.value = true
   try {
     // Fetch total properties
-    const propertiesResponse = await axios.get<CommonResponseInterface<any[]>>(
+    const propertiesResponse = await api.get<CommonResponseInterface<any[]>>(
       `${API_BASE_URL}/api/property`
     )
     
     // Fetch total bookings
-    const bookingsResponse = await axios.get<CommonResponseInterface<any[]>>(
+    const bookingsResponse = await api.get<CommonResponseInterface<any[]>>(
       `${API_BASE_URL}/api/bookings`
     )
     

@@ -13,7 +13,7 @@
           <div class="flex flex-col lg:flex-row gap-4">
             <!-- Add Property Button - Hidden for Customer -->
             <button
-              v-if="!isCustomer"
+              v-if="canCreateProperty"
               @click="goToAddProperty"
               class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center gap-2"
             >
@@ -186,13 +186,17 @@
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePropertyStore } from '@/stores/property/property.stores'
-import { getCurrentRole } from '@/config/axios.config'
+import { getCurrentRole, isSuperAdmin, isAccommodationOwner, isCustomer } from '@/config/axios.config'
 
 const router = useRouter()
 const propertyStore = usePropertyStore()
 
 const currentRole = computed(() => getCurrentRole())
-const isCustomer = computed(() => currentRole.value === 'CUSTOMER')
+const isSuperAdminRole = computed(() => isSuperAdmin(currentRole.value))
+const isCustomerRole = computed(() => isCustomer(currentRole.value))
+const isAccommodationOwnerRole = computed(() => isAccommodationOwner(currentRole.value))
+const canCreateProperty = computed(() => isSuperAdminRole.value || isAccommodationOwnerRole.value)
+
 
 const provinceMap: Record<number, string> = {
   11: 'Aceh', 12: 'Sumatera Utara', 13: 'Sumatera Barat', 14: 'Riau',

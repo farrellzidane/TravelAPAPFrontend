@@ -34,12 +34,32 @@ function getTokenFromCookie(): string | null {
 
 /**
  * Ambil token yang bisa dipakai FE:
- * 1. Coba dari localStorage
- * 2. Kalau belum ada, baca dari cookie lalu simpan ke localStorage
+ * 1. Prioritas: Coba dari cookie (token paling fresh dari login)
+ * 2. Fallback: Baca dari localStorage
  */
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
 
+  // Prioritas 1: Cek cookie terlebih dahulu (token fresh dari login)
+  let fromCookie = getTokenFromCookie();
+  if (fromCookie) {
+    fromCookie = fromCookie.replace(/^"|"$/g, '');
+    
+    // Cek apakah token di cookie berbeda dengan localStorage
+    const fromStorage = window.localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (fromStorage && fromStorage !== fromCookie) {
+      console.log('🔄 Token mismatch detected! Clearing old localStorage token');
+      console.log('Old token (first 50 chars):', fromStorage.substring(0, 50));
+      console.log('New token (first 50 chars):', fromCookie.substring(0, 50));
+    }
+    
+    // Update localStorage dengan token terbaru dari cookie
+    window.localStorage.setItem(TOKEN_STORAGE_KEY, fromCookie);
+    console.log('✅ Using token from cookie');
+    return fromCookie;
+  }
+
+  // Fallback: Cek localStorage jika cookie tidak ada
   let fromStorage = window.localStorage.getItem(TOKEN_STORAGE_KEY);
   if (fromStorage) {
     // Strip quotes from stored token if present
@@ -48,16 +68,11 @@ export function getToken(): string | null {
     if (fromStorage !== window.localStorage.getItem(TOKEN_STORAGE_KEY)) {
       window.localStorage.setItem(TOKEN_STORAGE_KEY, fromStorage);
     }
+    console.log('⚠️ Using token from localStorage (no cookie found)');
     return fromStorage;
   }
 
-  let fromCookie = getTokenFromCookie();
-  if (fromCookie) {
-    fromCookie = fromCookie.replace(/^"|"$/g, '');
-    window.localStorage.setItem(TOKEN_STORAGE_KEY, fromCookie);
-    return fromCookie;
-  }
-
+  console.log('❌ No token found in cookie or localStorage');
   return null;
 }
 

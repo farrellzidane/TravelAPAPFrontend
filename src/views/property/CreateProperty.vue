@@ -89,25 +89,21 @@
               ></textarea>
             </div>
 
-            <!-- Owner ID - Dropdown for Superadmin, Auto-filled for Owner -->
+            <!-- Owner ID - Manual Input for Superadmin, Auto-filled for Owner -->
             <div>
               <label class="block text-sm font-medium text-blue-700 mb-2">
                 Owner ID <span class="text-red-500">*</span>
               </label>
-              <!-- Superadmin: Dropdown -->
-              <select
-                v-if="isSuperAdmin"
+              <!-- Superadmin: Manual Input -->
+              <input
+                v-if="isSuperAdminRole"
                 v-model="formData.ownerID"
+                type="text"
                 required
-                @change="handleOwnerChange"
+                placeholder="Enter accommodation owner UUID"
                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Select Owner</option>
-                <option v-for="owner in ownerOptions" :key="owner.id" :value="owner.id">
-                  {{ owner.name }}
-                </option>
-              </select>
-              <!-- Owner: Readonly Input -->
+              />
+              <!-- Accommodation Owner: Readonly Input -->
               <input
                 v-else
                 v-model="formData.ownerID"
@@ -115,6 +111,9 @@
                 readonly
                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
               />
+              <p v-if="isSuperAdmin" class="mt-1 text-xs text-gray-500">
+                Enter the UUID of the accommodation owner (e.g., xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+              </p>
             </div>
 
             <!-- Owner Name -->
@@ -127,12 +126,15 @@
                 type="text"
                 required
                 placeholder="Enter owner name"
-                :readonly="isOwner"
+                :readonly="isOwnerRole"
                 :class="[
                   'w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                  isOwner ? 'bg-gray-100 cursor-not-allowed' : ''
+                  isOwnerRole ? 'bg-gray-100 cursor-not-allowed' : ''
                 ]"
               />
+              <p v-if="isSuperAdminRole" class="mt-1 text-xs text-gray-500">
+                Enter the full name of the accommodation owner
+              </p>
             </div>
           </div>
 
@@ -182,7 +184,7 @@ import { PropertyTypeByName } from '@/interfaces/property.interface'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import VDynamicForm from '@/components/property/VDynamicForm.vue'
-import { getCurrentRole, MOCK_USER_IDS } from '@/config/axios.config'
+import { getCurrentRole, getCurrentUserId, getCurrentUserName, isSuperAdmin, isAccommodationOwner } from '@/config/axios.config'
 
 const router = useRouter()
 const propertyStore = usePropertyStore()
@@ -190,18 +192,20 @@ const propertyStore = usePropertyStore()
 const loadingProvinces = ref(false)
 const provinces = ref<Province[]>([])
 
-// Role checking
+// Role checking using helper functions
 const currentRole = computed(() => getCurrentRole())
-const isSuperAdmin = computed(() => currentRole.value === 'SUPERADMIN')
-const isOwner = computed(() => currentRole.value === 'ACCOMMODATION_OWNER')
+const isSuperAdminRole = computed(() => isSuperAdmin(currentRole.value))
+const isOwnerRole = computed(() => isAccommodationOwner(currentRole.value))
+const canCreateProperty = computed(() => isSuperAdminRole.value || isOwnerRole.value)
 
-// Owner options for Superadmin
-const ownerOptions = [
-  { id: MOCK_USER_IDS.ACCOMMODATION_OWNER, name: 'Owner 1 (a058fb1b...)' },
-  // You can add more mock owners here if needed
-]
+// Get current user info from token
+const currentUserId = computed(() => getCurrentUserId())
+const currentUserName = computed(() => getCurrentUserName())
 
-const formData = ref<{
+// Owner options for Superadmin (empty for now, will be populated from API in the future)
+const ownerOptions = ref<Array<{ id: string; name: string }>>([])
+
+const formData = ref<{ 
   propertyName: string
   propertyType: string
   province: string
@@ -245,14 +249,6 @@ const handlePropertyTypeChange = () => {
     unitCount: null,
     roomTypeDescription: ''
   }]
-}
-
-const handleOwnerChange = () => {
-  // Auto-fill owner name when owner is selected (for Superadmin)
-  const selectedOwner = ownerOptions.find(o => o.id === formData.value.ownerID)
-  if (selectedOwner) {
-    formData.value.ownerName = selectedOwner.name.split(' (')[0] // Extract name without UUID
-  }
 }
 
 const validateForm = (): boolean => {
@@ -397,12 +393,23 @@ const handleBack = () => {
 }
 
 onMounted(() => {
+  // RBAC: Only Superadmin and Accommodation Owner can create property
+  if (!canCreateProperty.value) {
+    toast.error('You do not have permission to create properties')
+    router.push('/property')
+    return
+  }
+  
   fetchProvinces()
   
   // Auto-fill owner data if user is Accommodation Owner
-  if (isOwner.value) {
-    formData.value.ownerID = MOCK_USER_IDS.ACCOMMODATION_OWNER
-    formData.value.ownerName = 'Accommodation Owner' // You can fetch from user service
+  if (isOwnerRole.value) {
+    formData.value.ownerID = currentUserId.value
+    formData.value.ownerName = currentUserName.value
   }
+  
+  // For Superadmin: Manual entry of owner ID and name
+  // Note: In the future, this can be replaced with a dropdown that fetches
+  // accommodation owners from the SSO service
 })
 </script>

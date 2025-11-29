@@ -10,7 +10,9 @@
 
         <!-- Action Section -->
         <div class="mb-6">
+          <!-- Add Payment Method Button - Hidden for Customer -->
           <button
+            v-if="!isCustomer"
             @click="goToCreatePaymentMethod"
             class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center gap-2"
           >
@@ -19,6 +21,19 @@
             </svg>
             Add Payment Method
           </button>
+
+          <!-- Info for Customer -->
+          <div v-else class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start">
+              <svg class="w-5 h-5 text-blue-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+              </svg>
+              <div>
+                <p class="text-sm font-medium text-blue-800">View Only Access</p>
+                <p class="text-xs text-blue-600 mt-1">As a customer, you can view available payment methods but cannot modify them.</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Loading State -->
@@ -100,27 +115,31 @@
                   {{ formatDate(method.createdAt) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-center space-x-2">
-                  <button
-                    @click="toggleStatus(method)"
-                    :disabled="updatingId === method.paymentMethodId"
-                    :class="[
-                      'px-4 py-2 text-white text-sm font-semibold rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed',
-                      method.status === 'Active' 
-                        ? 'bg-yellow-600 hover:bg-yellow-700' 
-                        : 'bg-green-600 hover:bg-green-700'
-                    ]"
-                  >
-                    {{ updatingId === method.paymentMethodId 
-                      ? 'Updating...' 
-                      : method.status === 'Active' ? 'Deactivate' : 'Activate' }}
-                  </button>
-                  <button
-                    @click="handleDelete(method.paymentMethodId)"
-                    :disabled="deletingId === method.paymentMethodId"
-                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {{ deletingId === method.paymentMethodId ? 'Deleting...' : 'Delete' }}
-                  </button>
+                  <!-- Action buttons hidden for Customer -->
+                  <template v-if="!isCustomer">
+                    <button
+                      @click="toggleStatus(method)"
+                      :disabled="updatingId === method.paymentMethodId"
+                      :class="[
+                        'px-4 py-2 text-white text-sm font-semibold rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed',
+                        method.status === 'Active' 
+                          ? 'bg-yellow-600 hover:bg-yellow-700' 
+                          : 'bg-green-600 hover:bg-green-700'
+                      ]"
+                    >
+                      {{ updatingId === method.paymentMethodId 
+                        ? 'Updating...' 
+                        : method.status === 'Active' ? 'Deactivate' : 'Activate' }}
+                    </button>
+                    <button
+                      @click="handleDelete(method.paymentMethodId)"
+                      :disabled="deletingId === method.paymentMethodId"
+                      class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {{ deletingId === method.paymentMethodId ? 'Deleting...' : 'Delete' }}
+                    </button>
+                  </template>
+                  <span v-else class="text-sm text-gray-500 italic">View Only</span>
                 </td>
               </tr>
             </tbody>
@@ -144,13 +163,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePaymentMethodStore } from '@/stores/paymentmethod/paymentmethod.stores'
+import { getCurrentRole } from '@/config/axios.config'
 import type { PaymentMethod, UpdatePaymentMethodStatusRequest } from '@/interfaces/paymentmethod.interface'
 
 const router = useRouter()
 const paymentMethodStore = usePaymentMethodStore()
+
+const currentRole = computed(() => getCurrentRole())
+const isCustomer = computed(() => currentRole.value === 'CUSTOMER' || currentRole.value === 'Customer')
 
 const updatingId = ref<string | null>(null)
 const deletingId = ref<string | null>(null)

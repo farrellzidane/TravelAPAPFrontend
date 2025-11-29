@@ -525,7 +525,13 @@ import { toast } from 'vue-sonner'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import { useRoomStore } from '@/stores/room/room.stores'
-import { getCurrentRole } from '@/config/axios.config'
+import { 
+  getCurrentRole, 
+  getCurrentUserId, 
+  isSuperAdmin as isSuperAdminHelper, 
+  isAccommodationOwner as isAccommodationOwnerHelper, 
+  isCustomer as isCustomerHelper 
+} from '@/config/axios.config'
 import type { Property, DateFilter } from '@/interfaces/property.interface'
 import type { Room, MaintenanceForm, CreateMaintenanceRequest } from '@/interfaces/room.interface'
 import { PROVINCE_MAP } from '@/interfaces/property.interface'
@@ -553,14 +559,23 @@ const maintenanceForm = ref<MaintenanceForm>({
   maintenanceEnd: ''
 })
 
-// Role-based access control using getCurrentRole() approach
+// Role-based access control using helper functions
 const currentRole = computed(() => getCurrentRole())
-const isSuperAdmin = computed(() => currentRole.value === 'SUPERADMIN')
-const isAccommodationOwner = computed(() => currentRole.value === 'ACCOMMODATION_OWNER')
-const isCustomer = computed(() => currentRole.value === 'CUSTOMER')
+const currentUserId = computed(() => getCurrentUserId())
+const isSuperAdmin = computed(() => isSuperAdminHelper(currentRole.value))
+const isAccommodationOwner = computed(() => isAccommodationOwnerHelper(currentRole.value))
+const isCustomer = computed(() => isCustomerHelper(currentRole.value))
 
-// Customer cannot manage property (update, delete, add room)
-const canManageProperty = computed(() => isSuperAdmin.value || isAccommodationOwner.value)
+// Determine if user can manage this specific property
+const canManageProperty = computed(() => {
+  if (isCustomer.value) return false
+  if (isSuperAdmin.value) return true
+  // Accommodation Owner can only manage their own properties
+  if (isAccommodationOwner.value && property.value) {
+    return property.value.ownerID === currentUserId.value
+  }
+  return false
+})
 
 const today = computed(() => {
   return new Date().toISOString().split('T')[0]

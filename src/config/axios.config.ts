@@ -1,55 +1,56 @@
 import axios from 'axios'
+import { getToken } from '@/lib/auth'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
-// Mock tokens dengan UUID yang sesuai
-// Payload format: {"userId": "uuid-string", "role": "RoleName"}
-// Owner UUID: a058fb1b-cf37-4e91-99d2-17742d5add60
-// Customer UUID: 6d9b6f5d-0714-49a4-96fa-aa9f4b29c1f8
-export const AUTH_TOKENS = {
-  SUPERADMIN: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJyb2xlIjoiU3VwZXJhZG1pbiJ9.mockSignature',
-  ACCOMMODATION_OWNER: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhMDU4ZmIxYi1jZjM3LTRlOTEtOTlkMi0xNzc0MmQ1YWRkNjAiLCJyb2xlIjoiQWNjb21tb2RhdGlvbiBPd25lciJ9.mockSignature',
-  CUSTOMER: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZDliNmY1ZC0wNzE0LTQ5YTQtOTZmYS1hYTlmNGIyOWMxZjgiLCJyb2xlIjoiQ3VzdG9tZXIifQ.mockSignature'
+// Get current token from cookie/localStorage
+const getCurrentToken = (): string | null => {
+  return getToken()
 }
 
-// Mock User IDs untuk digunakan saat create property/booking
-export const MOCK_USER_IDS = {
-  SUPERADMIN: '00000000-0000-0000-0000-000000000001',
-  ACCOMMODATION_OWNER: 'a058fb1b-cf37-4e91-99d2-17742d5add60',
-  CUSTOMER: '6d9b6f5d-0714-49a4-96fa-aa9f4b29c1f8'
-}
-
-// Get current role from localStorage or default to SUPERADMIN
-const getCurrentToken = (): string => {
-  const role = localStorage.getItem('userRole') || 'SUPERADMIN'
-  return AUTH_TOKENS[role as keyof typeof AUTH_TOKENS] || AUTH_TOKENS.SUPERADMIN
-}
-
-// Function to set user role
-export const setUserRole = (role: keyof typeof AUTH_TOKENS) => {
-  localStorage.setItem('userRole', role)
-}
-
-// Function to get current role
+// Function to get current role from JWT token
 export const getCurrentRole = (): string => {
-  return localStorage.getItem('userRole') || 'SUPERADMIN'
+  try {
+    const token = getCurrentToken()
+    if (!token) {
+      return ''
+    }
+    
+    // JWT format: header.payload.signature
+    const parts = token.split('.')
+    if (parts.length !== 3 || !parts[1]) {
+      return ''
+    }
+    
+    // Decode payload (base64url)
+    const payload = JSON.parse(atob(parts[1]))
+    // Return role from token payload
+    return payload.role || payload.roles || ''
+  } catch (error) {
+    console.error('Error decoding token for role:', error)
+    return ''
+  }
 }
 
 // Function to decode JWT token and get user info
 export const getCurrentUserInfo = (): { userId: string; role: string } | null => {
   try {
     const token = getCurrentToken()
+    if (!token) {
+      return null
+    }
+    
     // JWT format: header.payload.signature
     const parts = token.split('.')
-    if (parts.length !== 3) {
+    if (parts.length !== 3 || !parts[1]) {
       return null
     }
     
     // Decode payload (base64url)
     const payload = JSON.parse(atob(parts[1]))
     return {
-      userId: payload.userId,
-      role: payload.role
+      userId: payload.id || payload.userId || payload.sub || '',
+      role: payload.role || payload.roles || ''
     }
   } catch (error) {
     console.error('Error decoding token:', error)
@@ -60,27 +61,58 @@ export const getCurrentUserInfo = (): { userId: string; role: string } | null =>
 // Function to get current user ID
 export const getCurrentUserId = (): string => {
   const userInfo = getCurrentUserInfo()
-  return userInfo?.userId || MOCK_USER_IDS.SUPERADMIN
+  return userInfo?.userId || ''
 }
 
-// Mock user names based on role
-export const MOCK_USER_NAMES = {
-  SUPERADMIN: 'Super Admin',
-  ACCOMMODATION_OWNER: 'Accommodation Owner',
-  CUSTOMER: 'John Doe'
-}
-
-// Function to get current user name
+// Function to get current user name from token
 export const getCurrentUserName = (): string => {
-  const role = getCurrentRole()
-  return MOCK_USER_NAMES[role as keyof typeof MOCK_USER_NAMES] || 'Unknown User'
+  try {
+    const token = getCurrentToken()
+    if (!token) {
+      return 'Unknown User'
+    }
+    
+    const parts = token.split('.')
+    if (parts.length !== 3 || !parts[1]) {
+      return 'Unknown User'
+    }
+    
+    const payload = JSON.parse(atob(parts[1]))
+    return payload.name || payload.username || payload.sub || 'Unknown User'
+  } catch (error) {
+    console.error('Error decoding token for name:', error)
+    return 'Unknown User'
+  }
+}
+
+// Role checking helper functions
+// These handle all role format variations including typos from backend
+export const isSuperAdmin = (role?: string): boolean => {
+  const r = role || getCurrentRole()
+  return r === 'SUPERADMIN' || r === 'Superadmin' || r === 'superadmin'
+}
+
+export const isAccommodationOwner = (role?: string): boolean => {
+  const r = role || getCurrentRole()
+  return r === 'ACCOMMODATION_OWNER' || 
+         r === 'Accommodation Owner' || 
+         r === 'Accomodation Owner' ||  // Typo variant from SSO
+         r === 'Accomodation owner' ||
+         r === 'accommodation_owner'
+}
+
+export const isCustomer = (role?: string): boolean => {
+  const r = role || getCurrentRole()
+  return r === 'CUSTOMER' || r === 'Customer' || r === 'customer'
 }
 
 // Add request interceptor to automatically include Bearer token
 axios.interceptors.request.use(
   (config) => {
-    // Add Authorization header with Bearer token based on current role
-    config.headers.Authorization = `Bearer ${getCurrentToken()}`
+    const token = getCurrentToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error) => {

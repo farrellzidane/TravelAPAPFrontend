@@ -29,12 +29,9 @@
               v-model="formData.customerId"
               type="text"
               required
-              :readonly="isCustomer"
-              :placeholder="isCustomer ? 'Auto-filled from your account' : 'Enter customer ID'"
-              :class="[
-                'w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                isCustomer ? 'bg-gray-100 cursor-not-allowed' : ''
-              ]"
+              readonly
+              placeholder="Customer ID"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-100"
             />
             <p v-if="isCustomer" class="mt-1 text-sm text-gray-500">Your customer ID is automatically filled</p>
           </div>
@@ -118,7 +115,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTopUpStore } from '@/stores/topup/topup.stores'
 import { usePaymentMethodStore } from '@/stores/paymentmethod/paymentmethod.stores'
-import { getCurrentRole, MOCK_USER_IDS } from '@/config/axios.config'
+import { getCurrentRole, getCurrentUserId } from '@/config/axios.config'
 import type { CreateTopUpRequest } from '@/interfaces/topup.interface'
 
 const router = useRouter()
@@ -151,7 +148,13 @@ onMounted(async () => {
   
   // Auto-fill customer ID if user is customer
   if (isCustomer.value) {
-    formData.customerId = MOCK_USER_IDS.CUSTOMER
+    const userId = getCurrentUserId()
+    formData.customerId = userId
+    
+    if (!userId) {
+      console.error('Failed to get user ID from token')
+      errorMessage.value = 'Failed to retrieve customer information. Please try logging in again.'
+    }
   }
   
   // Load payment methods

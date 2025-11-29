@@ -298,17 +298,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import type { Property, UpdatePropertyRequest, Province } from '@/interfaces/property.interface'
 import type { UpdateRoomTypeForm } from '@/interfaces/room.interface'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
+import { getCurrentRole, getCurrentUserId, isSuperAdmin, isAccommodationOwner, isCustomer } from '@/config/axios.config'
 
 const route = useRoute()
 const router = useRouter()
 const propertyStore = usePropertyStore()
+
+// Role-based access control
+const currentRole = computed(() => getCurrentRole())
+const currentUserId = computed(() => getCurrentUserId())
+const isSuperAdminRole = computed(() => isSuperAdmin(currentRole.value))
+const isAccommodationOwnerRole = computed(() => isAccommodationOwner(currentRole.value))
+const isCustomerRole = computed(() => isCustomer(currentRole.value))
+const canUpdateProperty = computed(() => isSuperAdminRole.value || isAccommodationOwnerRole.value)
 
 const property = ref<Property | null>(null)
 const loading = ref(false)
@@ -516,8 +525,24 @@ const goBack = () => {
   router.push('/property')
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // RBAC: Check if user has permission to update properties
+  if (!canUpdateProperty.value) {
+    toast.error('You do not have permission to update properties')
+    router.push('/property')
+    return
+  }
+  
   fetchProvinces()
-  fetchPropertyDetail()
+  await fetchPropertyDetail()
+  
+  // Additional check for Accommodation Owner: must own the property
+  if (isAccommodationOwnerRole.value && property.value) {
+    if (property.value.ownerID !== currentUserId.value) {
+      toast.error('You can only update properties that you own')
+      router.push('/property')
+      return
+    }
+  }
 })
 </script>
