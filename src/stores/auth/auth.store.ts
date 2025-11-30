@@ -5,10 +5,14 @@ import type { CurrentUser } from '@/interfaces/auth/profile.interface'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { toast } from 'vue-sonner'
-import { clearToken } from '@/lib/auth'
+import { clearToken, setToken } from '@/lib/auth'
 
 
-const basePostUrl = import.meta.env.VITE_API_URL + '/auth'
+const basePostUrl = "https://travel-apap-mock-server.vercel.app/api/auth"
+
+interface loginResponse {
+  token: string
+}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -28,18 +32,15 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
 
       try {
-        const response = await axios.post<CommonResponseInterface<{ token: string } & CurrentUser>>(
+        const response = await axios.post<CommonResponseInterface<loginResponse>>(
           `${basePostUrl}/login`,
-          payload, {
-            withCredentials: true,
-          }
+          payload
         )
 
-        const respData = response.data.data
+        const respData = response.data.data.token
 
-        this.token = respData.token
-        const { token, ...userFields } = respData
-        this.user = userFields as CurrentUser
+        this.token = respData
+        setToken(respData);
 
         toast.success(response.data.message || 'Login successful')
 

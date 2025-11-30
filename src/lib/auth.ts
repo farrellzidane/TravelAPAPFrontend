@@ -96,8 +96,7 @@ export function clearToken() {
  * Kalau token tidak ada, redirect ke facade login.
  */
 export function redirectToLogin(): never {
-  const current = encodeURIComponent(window.location.href);
-  const base = LOGIN_URL.endsWith("/") ? LOGIN_URL : LOGIN_URL + "/";
-  window.location.href = `${base}?redirect=${current}`;
+  window.location.href = `/login`;
+  
   throw new Error("No token available, redirecting to login");
 }

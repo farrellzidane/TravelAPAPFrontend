@@ -10,82 +10,82 @@
 
         <!-- Form -->
         <form @submit.prevent="handleSubmit" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Property Name -->
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-blue-700 mb-2">
-                Property Name <span class="text-red-500">*</span>
+              Property Name <span class="text-red-500">*</span>
               </label>
               <input
-                v-model="formData.propertyName"
-                type="text"
-                required
-                placeholder="Enter property name"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              v-model="formData.propertyName"
+              type="text"
+              required
+              placeholder="Enter property name"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             <!-- Property Type -->
             <div>
               <label class="block text-sm font-medium text-blue-700 mb-2">
-                Type <span class="text-red-500">*</span>
+              Type <span class="text-red-500">*</span>
               </label>
               <select
-                v-model="formData.propertyType"
-                required
-                @change="handlePropertyTypeChange"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              v-model="formData.propertyType"
+              required
+              @change="handlePropertyTypeChange"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">Select Type</option>
-                <option value="Hotel">Hotel</option>
-                <option value="Villa">Villa</option>
-                <option value="Apartemen">Apartemen</option>
+              <option value="">Select Type</option>
+              <option value="Hotel">Hotel</option>
+              <option value="Villa">Villa</option>
+              <option value="Apartemen">Apartemen</option>
               </select>
             </div>
 
             <!-- Province -->
             <div>
               <label class="block text-sm font-medium text-blue-700 mb-2">
-                Province <span class="text-red-500">*</span>
+              Province <span class="text-red-500">*</span>
               </label>
               <select
-                v-model="formData.province"
-                required
-                :disabled="loadingProvinces"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              v-model="formData.province"
+              required
+              :disabled="loadingProvinces"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               >
-                <option value="">{{ loadingProvinces ? 'Loading provinces...' : 'Pilih provinsi' }}</option>
-                <option v-for="province in provinces" :key="province.code" :value="province.code">
-                  {{ province.name }}
-                </option>
+              <option value="">{{ loadingProvinces ? 'Loading provinces...' : 'Pilih provinsi' }}</option>
+              <option v-for="province in provinces" :key="province.code" :value="province.code">
+                {{ province.name }}
+              </option>
               </select>
             </div>
 
             <!-- Address -->
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-blue-700 mb-2">
-                Address <span class="text-red-500">*</span>
+              Address <span class="text-red-500">*</span>
               </label>
               <textarea
-                v-model="formData.address"
-                required
-                rows="3"
-                placeholder="Enter property address"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              v-model="formData.address"
+              required
+              rows="3"
+              placeholder="Enter property address"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               ></textarea>
             </div>
 
             <!-- Description -->
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-blue-700 mb-2">
-                Description <span class="text-red-500">*</span>
+              Description <span class="text-red-500">*</span>
               </label>
               <textarea
-                v-model="formData.description"
-                required
-                rows="4"
-                placeholder="Enter property description"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              v-model="formData.description"
+              required
+              rows="4"
+              placeholder="Enter property description"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               ></textarea>
             </div>
 
@@ -105,7 +105,7 @@
               >
               <option value="">{{ loadingOwners ? 'Loading owners...' : 'Select accommodation owner' }}</option>
               <option v-for="owner in ownerOptions" :key="owner.id" :value="owner.id">
-                {{ owner.name }}
+              {{ owner.id }}
               </option>
               </select>
               <!-- Accommodation Owner: Readonly Input -->
@@ -261,15 +261,27 @@ const fetchProvinces = async () => {
 const fetchAccommodationOwners = async () => {
   loadingOwners.value = true
   try {
+    console.log('🔄 Fetching accommodation owners...')
     const owners = await userService.getAccommodationOwners()
+    
+    console.log('✅ Received owners:', owners)
+    
+    if (!owners || !Array.isArray(owners)) {
+      console.warn('⚠️ Invalid owners data:', owners)
+      toast.error('Invalid accommodation owners data received')
+      ownerOptions.value = []
+      return
+    }
+    
     ownerOptions.value = owners.map(owner => ({
       id: owner.userId,
       name: owner.name
     }))
     console.log('📋 Loaded accommodation owners:', ownerOptions.value)
   } catch (error) {
-    console.error('Error fetching accommodation owners:', error)
+    console.error('❌ Error fetching accommodation owners:', error)
     toast.error('Failed to load accommodation owners')
+    ownerOptions.value = []
   } finally {
     loadingOwners.value = false
   }
@@ -277,9 +289,18 @@ const fetchAccommodationOwners = async () => {
 
 const handleOwnerChange = () => {
   // Auto-fill owner name when owner is selected
+  if (!formData.value.ownerID) {
+    // If no owner selected (empty/reset), clear the owner name
+    formData.value.ownerName = ''
+    return
+  }
+  
   const selectedOwner = ownerOptions.value.find(owner => owner.id === formData.value.ownerID)
   if (selectedOwner) {
     formData.value.ownerName = selectedOwner.name
+    console.log('✅ Owner selected:', selectedOwner)
+  } else {
+    console.warn('⚠️ Owner not found for ID:', formData.value.ownerID)
   }
 }
 

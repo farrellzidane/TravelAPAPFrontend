@@ -184,7 +184,14 @@ const router = createRouter({
           next()
         }
       }
-    }
+        },
+        {
+          path: '/login',
+          name: 'login',
+          component: () => import('../views/auth/LoginView.vue'),
+          meta: { requiresGuest: true }
+        },
+
     // {
     //   path: '/about',
     //   name: 'about',
@@ -196,8 +203,13 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = getToken();
+
+  if (to.path.includes('/login') || to.path.includes('/register')) {
+    return next();
+  }
+  
   if (!token) {
-    redirectToLogin();
+    return redirectToLogin();
   }
   next();
 });
