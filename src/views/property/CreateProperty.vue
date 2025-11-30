@@ -89,30 +89,35 @@
               ></textarea>
             </div>
 
-            <!-- Owner ID - Manual Input for Superadmin, Auto-filled for Owner -->
+            <!-- Owner ID - Dropdown for Superadmin, Auto-filled for Owner -->
             <div>
               <label class="block text-sm font-medium text-blue-700 mb-2">
-                Owner ID <span class="text-red-500">*</span>
+              Owner Id <span class="text-red-500">*</span>
               </label>
-              <!-- Superadmin: Manual Input -->
-              <input
-                v-if="isSuperAdminRole"
-                v-model="formData.ownerID"
-                type="text"
-                required
-                placeholder="Enter accommodation owner UUID"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              <!-- Superadmin: Dropdown Selection -->
+              <select
+              v-if="isSuperAdminRole"
+              v-model="formData.ownerID"
+              required
+              @change="handleOwnerChange"
+              :disabled="loadingOwners"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              >
+              <option value="">{{ loadingOwners ? 'Loading owners...' : 'Select accommodation owner' }}</option>
+              <option v-for="owner in ownerOptions" :key="owner.id" :value="owner.id">
+                {{ owner.name }}
+              </option>
+              </select>
               <!-- Accommodation Owner: Readonly Input -->
               <input
-                v-else
-                v-model="formData.ownerID"
-                type="text"
-                readonly
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+              v-else
+              v-model="formData.ownerID"
+              type="text"
+              readonly
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
               />
-              <p v-if="isSuperAdmin()" class="mt-1 text-xs text-gray-500">
-                Enter the UUID of the accommodation owner (e.g., xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+              <p v-if="isSuperAdminRole" class="mt-1 text-xs text-gray-500">
+              Select the accommodation owner to assign this property to
               </p>
             </div>
 
@@ -126,14 +131,14 @@
                 type="text"
                 required
                 placeholder="Enter owner name"
-                :readonly="isOwnerRole"
+                :readonly="isOwnerRole || (isSuperAdminRole && !!formData.ownerID)"
                 :class="[
                   'w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                  isOwnerRole ? 'bg-gray-100 cursor-not-allowed' : ''
+                  (isOwnerRole || (isSuperAdminRole && formData.ownerID)) ? 'bg-gray-100 cursor-not-allowed' : ''
                 ]"
               />
               <p v-if="isSuperAdminRole" class="mt-1 text-xs text-gray-500">
-                Enter the full name of the accommodation owner
+                {{ formData.ownerID ? 'Auto-filled from selected owner' : 'Enter the full name of the accommodation owner' }}
               </p>
             </div>
           </div>
@@ -194,6 +199,7 @@ import type { Province, CreatePropertyRequest } from '@/interfaces/property.inte
 import type { RoomTypeForm } from '@/interfaces/room.interface'
 import { PropertyTypeByName } from '@/interfaces/property.interface'
 import { propertyService } from '@/services/property.service'
+import { userService } from '@/services/user.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import VDynamicForm from '@/components/property/VDynamicForm.vue'
 import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
@@ -203,6 +209,7 @@ const router = useRouter()
 const propertyStore = usePropertyStore()
 
 const loadingProvinces = ref(false)
+const loadingOwners = ref(false)
 const provinces = ref<Province[]>([])
 const showBackConfirmDialog = ref(false)
 
@@ -216,7 +223,7 @@ const canCreateProperty = computed(() => isSuperAdminRole.value || isOwnerRole.v
 const currentUserId = computed(() => getCurrentUserId())
 const currentUserName = computed(() => getCurrentUserName())
 
-// Owner options for Superadmin (empty for now, will be populated from API in the future)
+// Owner options for Superadmin - populated from API
 const ownerOptions = ref<Array<{ id: string; name: string }>>([])
 
 const formData = ref<{ 
@@ -248,6 +255,31 @@ const fetchProvinces = async () => {
     toast.warning('Using fallback provinces list')
   } finally {
     loadingProvinces.value = false
+  }
+}
+
+const fetchAccommodationOwners = async () => {
+  loadingOwners.value = true
+  try {
+    const owners = await userService.getAccommodationOwners()
+    ownerOptions.value = owners.map(owner => ({
+      id: owner.userId,
+      name: owner.name
+    }))
+    console.log('📋 Loaded accommodation owners:', ownerOptions.value)
+  } catch (error) {
+    console.error('Error fetching accommodation owners:', error)
+    toast.error('Failed to load accommodation owners')
+  } finally {
+    loadingOwners.value = false
+  }
+}
+
+const handleOwnerChange = () => {
+  // Auto-fill owner name when owner is selected
+  const selectedOwner = ownerOptions.value.find(owner => owner.id === formData.value.ownerID)
+  if (selectedOwner) {
+    formData.value.ownerName = selectedOwner.name
   }
 }
 
@@ -425,8 +457,9 @@ onMounted(() => {
     formData.value.ownerName = currentUserName.value
   }
   
-  // For Superadmin: Manual entry of owner ID and name
-  // Note: In the future, this can be replaced with a dropdown that fetches
-  // accommodation owners from the SSO service
+  // For Superadmin: Fetch accommodation owners from backend
+  if (isSuperAdminRole.value) {
+    fetchAccommodationOwners()
+  }
 })
 </script>
