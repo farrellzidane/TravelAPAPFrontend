@@ -159,6 +159,31 @@
         </div>
       </div>
     </div>
+
+    <!-- Status Toggle Confirmation -->
+    <VConfirmDialog
+      v-model="showStatusConfirm"
+      title="Update Payment Method Status"
+      variant="warning"
+      :message="`Are you sure you want to ${pendingMethod?.status === 'Active' ? 'deactivate' : 'activate'} this payment method?`"
+      confirm-text="Confirm"
+      cancel-text="Cancel"
+      @confirm="confirmToggleStatus"
+      @cancel="showStatusConfirm = false"
+    />
+
+    <!-- Delete Confirmation -->
+    <VConfirmDialog
+      v-model="showDeleteConfirm"
+      title="Delete Payment Method"
+      variant="danger"
+      message="Are you sure you want to delete this payment method?"
+      subtitle="This action cannot be undone"
+      confirm-text="Delete"
+      cancel-text="Cancel"
+      @confirm="confirmDelete"
+      @cancel="showDeleteConfirm = false"
+    />
   </div>
 </template>
 
@@ -168,6 +193,7 @@ import { useRouter } from 'vue-router'
 import { usePaymentMethodStore } from '@/stores/paymentmethod/paymentmethod.stores'
 import { getCurrentRole } from '@/config/axios.config'
 import type { PaymentMethod, UpdatePaymentMethodStatusRequest } from '@/interfaces/paymentmethod.interface'
+import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
 
 const router = useRouter()
 const paymentMethodStore = usePaymentMethodStore()
@@ -177,6 +203,10 @@ const isCustomer = computed(() => currentRole.value === 'CUSTOMER' || currentRol
 
 const updatingId = ref<string | null>(null)
 const deletingId = ref<string | null>(null)
+const showStatusConfirm = ref(false)
+const showDeleteConfirm = ref(false)
+const pendingMethod = ref<PaymentMethod | null>(null)
+const pendingDeleteId = ref<string>('')
 
 onMounted(async () => {
   await paymentMethodStore.fetchAllPaymentMethods()
@@ -187,18 +217,21 @@ const goToCreatePaymentMethod = () => {
 }
 
 const toggleStatus = async (method: PaymentMethod) => {
-  const newStatus = method.status === 'Active' ? 'Inactive' : 'Active'
-  const action = newStatus === 'Active' ? 'activate' : 'deactivate'
-  
-  if (!confirm(`Are you sure you want to ${action} this payment method?`)) {
-    return
-  }
+  pendingMethod.value = method
+  showStatusConfirm.value = true
+}
 
-  updatingId.value = method.paymentMethodId
+const confirmToggleStatus = async () => {
+  showStatusConfirm.value = false
+  
+  if (!pendingMethod.value) return
+  
+  const newStatus = pendingMethod.value.status === 'Active' ? 'Inactive' : 'Active'
+  updatingId.value = pendingMethod.value.paymentMethodId
 
   try {
     const data: UpdatePaymentMethodStatusRequest = { 
-      paymentMethodId: method.paymentMethodId,
+      paymentMethodId: pendingMethod.value.paymentMethodId,
       status: newStatus 
     }
     await paymentMethodStore.updatePaymentMethodStatus(data)
@@ -209,15 +242,17 @@ const toggleStatus = async (method: PaymentMethod) => {
   }
 }
 
-const handleDelete = async (id: string) => {
-  if (!confirm('Are you sure you want to delete this payment method? This action cannot be undone.')) {
-    return
-  }
+const handleDelete = (id: string) => {
+  pendingDeleteId.value = id
+  showDeleteConfirm.value = true
+}
 
-  deletingId.value = id
+const confirmDelete = async () => {
+  showDeleteConfirm.value = false
+  deletingId.value = pendingDeleteId.value
 
   try {
-    await paymentMethodStore.deletePaymentMethod(id)
+    await paymentMethodStore.deletePaymentMethod(pendingDeleteId.value)
   } catch (error) {
     console.error('Failed to delete payment method:', error)
   } finally {

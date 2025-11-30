@@ -268,6 +268,19 @@
         </div>
       </div>
     </div>
+
+    <!-- Cancel Booking Confirmation -->
+    <VConfirmDialog
+      v-model="showCancelConfirm"
+      title="Cancel Booking"
+      variant="danger"
+      message="Are you sure you want to cancel this booking?"
+      subtitle="This action cannot be undone"
+      confirm-text="Cancel Booking"
+      cancel-text="Keep Booking"
+      @confirm="confirmCancel"
+      @cancel="showCancelConfirm = false"
+    />
   </div>
 </template>
 
@@ -281,12 +294,14 @@ import { getCurrentRole } from '@/config/axios.config'
 import type { UpdateBookingRequest, Booking } from '@/interfaces/booking.interface'
 import type { Property } from '@/interfaces/property.interface'
 import type { RoomType, Room } from '@/interfaces/room.interface'
+import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
 
 const submitting = ref(false)
 const cancelling = ref(false)
+const showCancelConfirm = ref(false)
 const loadingBooking = ref(false)
 const loadingProperties = ref(false)
 const loadingRoomTypes = ref(false)
@@ -615,11 +630,13 @@ const handleBack = () => {
   router.back()
 }
 
-const handleCancel = async () => {
-  if (!confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
-    return
-  }
+const handleCancel = () => {
+  showCancelConfirm.value = true
+}
 
+const confirmCancel = async () => {
+  showCancelConfirm.value = false
+  
   try {
     cancelling.value = true
 

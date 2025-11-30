@@ -232,6 +232,32 @@
         </div>
       </div>
     </div>
+
+    <!-- Submit Confirmation -->
+    <VConfirmDialog
+      v-model="showSubmitConfirm"
+      title="Add Room Types"
+      variant="info"
+      :message="`Are you sure you want to add ${formData.roomTypes.length} room type(s) to &quot;${property?.propertyName}&quot;?`"
+      subtitle="This will create new rooms based on the unit count specified for each room type"
+      confirm-text="Add"
+      cancel-text="Cancel"
+      @confirm="confirmSubmit"
+      @cancel="showSubmitConfirm = false"
+    />
+
+    <!-- Back Confirmation -->
+    <VConfirmDialog
+      v-model="showBackConfirm"
+      title="Discard Changes"
+      variant="warning"
+      message="Are you sure you want to go back?"
+      subtitle="All unsaved changes will be lost"
+      confirm-text="Discard"
+      cancel-text="Stay"
+      @confirm="confirmBack"
+      @cancel="showBackConfirm = false"
+    />
   </div>
 </template>
 
@@ -244,6 +270,7 @@ import type { AddRoomTypeForm, AddRoomTypeRequest } from '@/interfaces/room.inte
 import { ROOM_TYPE_OPTIONS } from '@/interfaces/room.interface'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
+import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -252,6 +279,8 @@ const propertyStore = usePropertyStore()
 const property = ref<Property | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
+const showSubmitConfirm = ref(false)
+const showBackConfirm = ref(false)
 
 const formData = ref<{
   roomTypes: AddRoomTypeForm[]
@@ -402,11 +431,13 @@ const handleSubmit = async () => {
     return
   }
 
-  const confirmed = confirm(
-    `Are you sure you want to add ${formData.value.roomTypes.length} room type(s) to "${property.value.propertyName}"?\n\nThis will create new rooms based on the unit count specified for each room type.`
-  )
+  showSubmitConfirm.value = true
+}
 
-  if (!confirmed) return
+const confirmSubmit = async () => {
+  showSubmitConfirm.value = false
+  
+  if (!property.value) return
 
   try {
     const requestData: AddRoomTypeRequest = {
@@ -440,12 +471,15 @@ const handleBack = () => {
   if (formData.value.roomTypes.some(rt => 
     rt.roomTypeName || rt.facility || rt.capacity || rt.price || rt.floor || rt.unitCount || rt.description
   )) {
-    if (confirm('Are you sure you want to go back? All unsaved changes will be lost.')) {
-      goBack()
-    }
+    showBackConfirm.value = true
   } else {
     goBack()
   }
+}
+
+const confirmBack = () => {
+  showBackConfirm.value = false
+  goBack()
 }
 
 const goBack = () => {

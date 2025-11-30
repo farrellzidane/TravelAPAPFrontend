@@ -25,9 +25,18 @@ export const propertyService = {
       
       // Add query params if filter is provided
       if (filter?.checkIn && filter?.checkOut) {
+        // Convert date to ISO datetime format for backend (LocalDateTime)
+        const checkInDateTime = filter.checkIn.includes('T') 
+          ? filter.checkIn 
+          : `${filter.checkIn}T14:00:00` // Default check-in time 14:00
+        
+        const checkOutDateTime = filter.checkOut.includes('T')
+          ? filter.checkOut
+          : `${filter.checkOut}T12:00:00` // Default check-out time 12:00
+        
         const params = new URLSearchParams({
-          checkIn: filter.checkIn,
-          checkOut: filter.checkOut
+          checkIn: checkInDateTime,
+          checkOut: checkOutDateTime
         })
         url += `?${params.toString()}`
       }

@@ -171,6 +171,18 @@
         </form>
       </div>
     </div>
+
+    <!-- Unsaved Changes Confirmation Dialog -->
+    <VConfirmDialog
+      v-model="showBackConfirmDialog"
+      title="Unsaved Changes"
+      subtitle="You have unsaved data"
+      message="Are you sure you want to go back? All unsaved changes will be lost."
+      variant="warning"
+      confirm-text="Yes, Go Back"
+      cancel-text="No, Stay Here"
+      @confirm="confirmBack"
+    />
   </div>
 </template>
 
@@ -184,6 +196,7 @@ import { PropertyTypeByName } from '@/interfaces/property.interface'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import VDynamicForm from '@/components/property/VDynamicForm.vue'
+import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
 import { getCurrentRole, getCurrentUserId, getCurrentUserName, isSuperAdmin, isAccommodationOwner } from '@/config/axios.config'
 
 const router = useRouter()
@@ -191,6 +204,7 @@ const propertyStore = usePropertyStore()
 
 const loadingProvinces = ref(false)
 const provinces = ref<Province[]>([])
+const showBackConfirmDialog = ref(false)
 
 // Role checking using helper functions
 const currentRole = computed(() => getCurrentRole())
@@ -384,12 +398,15 @@ const handleBack = () => {
     formData.value.roomTypes.length > 0
 
   if (hasData) {
-    if (confirm('Are you sure you want to go back? All unsaved changes will be lost.')) {
-      router.push('/property')
-    }
+    showBackConfirmDialog.value = true
   } else {
     router.push('/property')
   }
+}
+
+const confirmBack = () => {
+  showBackConfirmDialog.value = false
+  router.push('/property')
 }
 
 onMounted(() => {

@@ -515,6 +515,24 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Maintenance Confirmation Dialog -->
+    <VConfirmDialog
+      v-model="showMaintenanceConfirm"
+      title="Schedule Maintenance"
+      variant="warning"
+      :message="`Are you sure you want to schedule maintenance for room ${selectedRoom?.roomID}?`"
+      :subtitle="`Start: ${selectedRoom ? new Date(maintenanceForm.maintenanceStart).toLocaleString('id-ID') : ''}\nEnd: ${selectedRoom ? new Date(maintenanceForm.maintenanceEnd).toLocaleString('id-ID') : ''}`"
+      confirm-text="Schedule"
+      cancel-text="Cancel"
+      :notes="[
+        'This will replace any existing maintenance schedule',
+        'The room will be unavailable for booking during the maintenance period only'
+      ]"
+      notes-title="Important Notes"
+      @confirm="confirmScheduleMaintenance"
+      @cancel="showMaintenanceConfirm = false"
+    />
   </div>
 </template>
 
@@ -525,6 +543,7 @@ import { toast } from 'vue-sonner'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import { useRoomStore } from '@/stores/room/room.stores'
+import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
 import { 
   getCurrentRole, 
   getCurrentUserId, 
@@ -547,6 +566,7 @@ const error = ref<string | null>(null)
 const showDeleteModal = ref(false)
 const deletingProperty = ref(false)
 const showMaintenanceModal = ref(false)
+const showMaintenanceConfirm = ref(false)
 const selectedRoom = ref<Room | null>(null)
 
 const dateFilter = ref<DateFilter>({
@@ -787,16 +807,14 @@ const handleMaintenanceSubmit = async () => {
     return
   }
 
-  const confirmed = confirm(
-    `Are you sure you want to schedule maintenance for room ${selectedRoom.value.roomID}?\n\n` +
-    `Start: ${new Date(maintenanceForm.value.maintenanceStart).toLocaleString('id-ID')}\n` +
-    `End: ${new Date(maintenanceForm.value.maintenanceEnd).toLocaleString('id-ID')}\n\n` +
-    `Note: This will replace any existing maintenance schedule.\n` +
-    `The room will be unavailable for booking during the maintenance period only.`
-  )
+  showMaintenanceConfirm.value = true
+}
 
-  if (!confirmed) return
-
+const confirmScheduleMaintenance = async () => {
+  showMaintenanceConfirm.value = false
+  
+  if (!selectedRoom.value) return
+  
   try {
     const requestData: CreateMaintenanceRequest = {
       roomID: selectedRoom.value.roomID,

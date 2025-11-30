@@ -294,6 +294,32 @@
         </form>
       </div>
     </div>
+
+    <!-- Submit Confirmation -->
+    <VConfirmDialog
+      v-model="showSubmitConfirm"
+      title="Update Property"
+      variant="warning"
+      :message="`Are you sure you want to update property &quot;${formData.propertyName}&quot;?`"
+      subtitle="Changes will not affect existing bookings unless they are updated separately"
+      confirm-text="Update"
+      cancel-text="Cancel"
+      @confirm="confirmSubmit"
+      @cancel="showSubmitConfirm = false"
+    />
+
+    <!-- Back Confirmation -->
+    <VConfirmDialog
+      v-model="showBackConfirm"
+      title="Discard Changes"
+      variant="warning"
+      message="Are you sure you want to go back?"
+      subtitle="All unsaved changes will be lost"
+      confirm-text="Discard"
+      cancel-text="Stay"
+      @confirm="confirmBack"
+      @cancel="showBackConfirm = false"
+    />
   </div>
 </template>
 
@@ -306,6 +332,7 @@ import type { UpdateRoomTypeForm } from '@/interfaces/room.interface'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import { getCurrentRole, getCurrentUserId, isSuperAdmin, isAccommodationOwner, isCustomer } from '@/config/axios.config'
+import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -324,6 +351,8 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const loadingProvinces = ref(false)
 const provinces = ref<Province[]>([])
+const showSubmitConfirm = ref(false)
+const showBackConfirm = ref(false)
 
 const formData = ref<{
   propertyID: string
@@ -451,12 +480,12 @@ const handleSubmit = async () => {
     return
   }
 
-  const confirmed = confirm(
-    `Are you sure you want to update property "${formData.value.propertyName}"?\n\nNote: Changes will not affect existing bookings unless they are updated separately.`
-  )
+  showSubmitConfirm.value = true
+}
 
-  if (!confirmed) return
-
+const confirmSubmit = async () => {
+  showSubmitConfirm.value = false
+  
   try {
     const requestData: UpdatePropertyRequest = {
       propertyID: formData.value.propertyID,
@@ -513,12 +542,15 @@ const handleBack = () => {
     )
 
   if (hasChanges) {
-    if (confirm('Are you sure you want to go back? All unsaved changes will be lost.')) {
-      router.push(`/property/${formData.value.propertyID}`)
-    }
+    showBackConfirm.value = true
   } else {
     router.push(`/property/${formData.value.propertyID}`)
   }
+}
+
+const confirmBack = () => {
+  showBackConfirm.value = false
+  router.push(`/property/${formData.value.propertyID}`)
 }
 
 const goBack = () => {

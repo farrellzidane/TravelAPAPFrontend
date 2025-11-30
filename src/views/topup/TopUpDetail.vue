@@ -126,6 +126,31 @@
         </div>
       </div>
     </div>
+
+    <!-- Status Update Confirmation -->
+    <VConfirmDialog
+      v-model="showStatusConfirm"
+      title="Update Transaction Status"
+      variant="warning"
+      :message="`Are you sure you want to mark this transaction as ${pendingStatus}?`"
+      confirm-text="Confirm"
+      cancel-text="Cancel"
+      @confirm="confirmUpdateStatus"
+      @cancel="showStatusConfirm = false"
+    />
+
+    <!-- Delete Confirmation -->
+    <VConfirmDialog
+      v-model="showDeleteConfirm"
+      title="Delete Transaction"
+      variant="danger"
+      message="Are you sure you want to delete this transaction?"
+      subtitle="This action cannot be undone"
+      confirm-text="Delete"
+      cancel-text="Cancel"
+      @confirm="confirmDelete"
+      @cancel="showDeleteConfirm = false"
+    />
   </div>
 </template>
 
@@ -135,6 +160,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useTopUpStore } from '@/stores/topup/topup.stores'
 import { getCurrentRole } from '@/config/axios.config'
 import type { UpdateTopUpStatusRequest } from '@/interfaces/topup.interface'
+import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -142,6 +168,9 @@ const topUpStore = useTopUpStore()
 
 const isUpdating = ref(false)
 const isDeleting = ref(false)
+const showStatusConfirm = ref(false)
+const showDeleteConfirm = ref(false)
+const pendingStatus = ref<string>('')
 
 const topUpId = ref(route.params.id as string)
 
@@ -161,16 +190,18 @@ const loadTopUp = async () => {
 }
 
 const updateStatus = async (status: string) => {
-  if (!confirm(`Are you sure you want to mark this transaction as ${status}?`)) {
-    return
-  }
+  pendingStatus.value = status
+  showStatusConfirm.value = true
+}
 
+const confirmUpdateStatus = async () => {
+  showStatusConfirm.value = false
   isUpdating.value = true
 
   try {
     const data: UpdateTopUpStatusRequest = { 
       transactionId: topUpId.value,
-      status 
+      status: pendingStatus.value 
     }
     await topUpStore.updateTopUpStatus(data)
   } catch (error) {
@@ -180,11 +211,12 @@ const updateStatus = async (status: string) => {
   }
 }
 
-const handleDelete = async () => {
-  if (!confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) {
-    return
-  }
+const handleDelete = () => {
+  showDeleteConfirm.value = true
+}
 
+const confirmDelete = async () => {
+  showDeleteConfirm.value = false
   isDeleting.value = true
 
   try {
