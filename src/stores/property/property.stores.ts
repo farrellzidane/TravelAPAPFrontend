@@ -63,7 +63,7 @@ export const usePropertyStore = defineStore('property', {
       } catch (error: any) {
         console.error('Error fetching properties:', error)
         this.error = error.response?.data?.message || error.message || 'Failed to load properties'
-        toast.error(this.error)
+        toast.error(this.error || 'Failed to load properties')
       } finally {
         this.loading = false
       }
@@ -92,7 +92,7 @@ export const usePropertyStore = defineStore('property', {
       } catch (error: any) {
         console.error('Error fetching filtered properties:', error)
         this.error = error.response?.data?.message || error.message || 'Failed to load properties'
-        toast.error(this.error)
+        toast.error(this.error || 'Failed to load properties')
       } finally {
         this.loading = false
       }
@@ -116,7 +116,7 @@ export const usePropertyStore = defineStore('property', {
       } catch (error: any) {
         console.error('Error fetching property:', error)
         this.error = error.response?.data?.message || error.message || 'Failed to load property'
-        toast.error(this.error)
+        toast.error(this.error || 'Failed to load property')
         throw error
       } finally {
         this.loading = false
@@ -313,9 +313,9 @@ export const usePropertyStore = defineStore('property', {
     // Reset filters
     resetFilters(): void {
       this.filters = {
-        search: '',
+        name: '',
         type: '',
-        status: ''
+        province: ''
       }
     },
 
@@ -329,9 +329,9 @@ export const usePropertyStore = defineStore('property', {
       this.properties = []
       this.currentProperty = null
       this.filters = {
-        search: '',
+        name: '',
         type: '',
-        status: ''
+        province: ''
       }
       this.loading = false
       this.error = null

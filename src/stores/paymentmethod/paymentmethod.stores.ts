@@ -74,7 +74,7 @@ export const usePaymentMethodStore = defineStore('paymentMethod', {
       } catch (error: any) {
         console.error('Error fetching payment methods:', error)
         this.error = error.response?.data?.message || error.message || 'Failed to fetch payment methods'
-        toast.error(this.error)
+        toast.error(this.error || 'Failed to fetch payment methods')
         throw error
       } finally {
         this.loading = false
@@ -106,7 +106,7 @@ export const usePaymentMethodStore = defineStore('paymentMethod', {
       } catch (error: any) {
         console.error('Error creating payment method:', error)
         this.error = error.response?.data?.message || error.message || 'Failed to create payment method'
-        toast.error(this.error)
+        toast.error(this.error || 'Failed to create payment method')
         throw error
       } finally {
         this.loading = false
@@ -141,7 +141,7 @@ export const usePaymentMethodStore = defineStore('paymentMethod', {
       } catch (error: any) {
         console.error('Error updating payment method status:', error)
         this.error = error.response?.data?.message || error.message || 'Failed to update payment method status'
-        toast.error(this.error)
+        toast.error(this.error || 'Failed to update payment method status')
         throw error
       } finally {
         this.loading = false
@@ -166,7 +166,7 @@ export const usePaymentMethodStore = defineStore('paymentMethod', {
       } catch (error: any) {
         console.error('Error deleting payment method:', error)
         this.error = error.response?.data?.message || error.message || 'Failed to delete payment method'
-        toast.error(this.error)
+        toast.error(this.error || 'Failed to delete payment method')
         throw error
       } finally {
         this.loading = false

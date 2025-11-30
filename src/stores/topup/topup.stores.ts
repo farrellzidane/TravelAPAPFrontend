@@ -77,7 +77,7 @@ export const useTopUpStore = defineStore('topup', {
       } catch (error: any) {
         console.error('Error fetching top-ups:', error)
         this.error = error.response?.data?.message || error.message || 'Failed to fetch top-ups'
-        toast.error(this.error)
+        toast.error(this.error || 'Failed to fetch top-ups')
         throw error
       } finally {
         this.loading = false
@@ -105,7 +105,7 @@ export const useTopUpStore = defineStore('topup', {
       } catch (error: any) {
         console.error('Error fetching top-up:', error)
         this.error = error.response?.data?.message || error.message || 'Failed to fetch top-up'
-        toast.error(this.error)
+        toast.error(this.error || 'Failed to fetch top-up')
         throw error
       } finally {
         this.loading = false
@@ -137,7 +137,7 @@ export const useTopUpStore = defineStore('topup', {
       } catch (error: any) {
         console.error('Error creating top-up:', error)
         this.error = error.response?.data?.message || error.message || 'Failed to create top-up'
-        toast.error(this.error)
+        toast.error(this.error || 'Failed to create top-up')
         throw error
       } finally {
         this.loading = false
@@ -176,7 +176,7 @@ export const useTopUpStore = defineStore('topup', {
       } catch (error: any) {
         console.error('Error updating top-up status:', error)
         this.error = error.response?.data?.message || error.message || 'Failed to update top-up status'
-        toast.error(this.error)
+        toast.error(this.error || 'Failed to update top-up status')
         throw error
       } finally {
         this.loading = false
@@ -206,7 +206,7 @@ export const useTopUpStore = defineStore('topup', {
       } catch (error: any) {
         console.error('Error deleting top-up:', error)
         this.error = error.response?.data?.message || error.message || 'Failed to delete top-up'
-        toast.error(this.error)
+        toast.error(this.error || 'Failed to delete top-up')
         throw error
       } finally {
         this.loading = false
