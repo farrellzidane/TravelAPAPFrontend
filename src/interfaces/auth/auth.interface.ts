@@ -4,7 +4,6 @@ import type { CurrentUser } from '@/interfaces/auth/profile.interface'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { toast } from 'vue-sonner'
-import { clearToken } from '@/lib/auth'
 
 
 const basePostUrl = import.meta.env.VITE_API_URL + '/auth'
@@ -63,8 +62,8 @@ export const useAuthStore = defineStore('auth', {
       try {
         this.loading = true
 
-        // Remove cookies
-        clearToken();
+        // Clear cookies handled by backend
+        // Cookie is httpOnly and will be cleared on next request
 
         // Clear store
         this.user = null

@@ -186,12 +186,14 @@
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePropertyStore } from '@/stores/property/property.stores'
-import { getCurrentRole, isSuperAdmin, isAccommodationOwner, isCustomer } from '@/config/axios.config'
+import { useAuthStore } from '@/stores/auth/auth.store'
+import { isSuperAdmin, isAccommodationOwner, isCustomer } from '@/config/axios.config'
 
 const router = useRouter()
 const propertyStore = usePropertyStore()
+const authStore = useAuthStore()
 
-const currentRole = computed(() => getCurrentRole())
+const currentRole = computed(() => authStore.userRole || '')
 const isSuperAdminRole = computed(() => isSuperAdmin(currentRole.value))
 const isCustomerRole = computed(() => isCustomer(currentRole.value))
 const isAccommodationOwnerRole = computed(() => isAccommodationOwner(currentRole.value))

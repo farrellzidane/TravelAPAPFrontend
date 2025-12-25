@@ -569,7 +569,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { useBookingStore } from '@/stores/booking/booking.stores'
-import { getCurrentRole } from '@/config/axios.config'
+import { useAuthStore } from '@/stores/auth/auth.store'
 import type { Booking } from '@/interfaces/booking.interface'
 
 const route = useRoute()
@@ -586,7 +586,8 @@ const showPaymentModal = ref(false)
 const processingAction = ref(false)
 
 const isCustomer = computed(() => {
-  return getCurrentRole() === 'CUSTOMER'
+  const authStore = useAuthStore()
+  return authStore.currentUserInfo?.role === 'CUSTOMER'
 })
 
 const canWriteReview = computed(() => {

@@ -81,7 +81,7 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import axios from 'axios'
 import type { CommonResponseInterface } from '@/interfaces/common.response.interface'
-import api from '@/lib/safe.api'
+import api from '@/config/axios.config'
 
 const router = useRouter()
 

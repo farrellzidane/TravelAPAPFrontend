@@ -5,7 +5,7 @@ import { defineStore } from 'pinia'
 import axios, { type AxiosResponse } from "axios";
 import { toast } from 'vue-sonner';
 import { useRouter } from 'vue-router';
-import api from '@/lib/safe.api';
+import api from '@/config/axios.config';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 

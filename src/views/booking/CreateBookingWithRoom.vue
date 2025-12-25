@@ -198,11 +198,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { bookingService } from '@/services/booking.service'
-import { getCurrentUserId, getCurrentRole } from '@/config/axios.config'
 import type { CreateBookingRequest } from '@/interfaces/booking.interface'
+import { useAuthStore } from '@/stores/auth/auth.store'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 
 const submitting = ref(false)
 
@@ -251,7 +252,7 @@ const initializeForm = () => {
   }
 
   // Check if user is customer
-  const currentRole = getCurrentRole()
+  const currentRole = authStore.currentUserInfo?.role || ''
   const isCustomer = currentRole === 'CUSTOMER' || currentRole === 'Customer'
   if (!isCustomer) {
     toast.error('Only customers can create bookings')
@@ -263,7 +264,7 @@ const initializeForm = () => {
   formData.value.roomNumber = roomNumber || ''
   
   // Auto-fill customer ID from current user
-  formData.value.customerID = getCurrentUserId()
+  formData.value.customerID = authStore.currentUserInfo?.userId || ''
   
   if (checkIn) {
     formData.value.checkInDate = checkIn

@@ -1,118 +1,58 @@
 import axios from 'axios'
-import { getToken } from '@/lib/auth'
+import { redirectToLogin } from '@/lib/auth'
+import { toast } from 'vue-sonner'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
-// Get current token from cookie/localStorage
-const getCurrentToken = (): string | null => {
-  return getToken()
-}
-
-// Function to get current role from JWT token
-export const getCurrentRole = (): string => {
-  try {
-    const token = getCurrentToken()
-    if (!token) {
-      return ''
-    }
-    
-    // JWT format: header.payload.signature
-    const parts = token.split('.')
-    if (parts.length !== 3 || !parts[1]) {
-      return ''
-    }
-    
-    // Decode payload (base64url)
-    const payload = JSON.parse(atob(parts[1]))
-    // Return role from token payload
-    return payload.role || payload.roles || ''
-  } catch (error) {
-    console.error('Error decoding token for role:', error)
-    return ''
-  }
-}
-
-// Function to decode JWT token and get user info
-export const getCurrentUserInfo = (): { userId: string; role: string } | null => {
-  try {
-    const token = getCurrentToken()
-    if (!token) {
-      return null
-    }
-    
-    // JWT format: header.payload.signature
-    const parts = token.split('.')
-    if (parts.length !== 3 || !parts[1]) {
-      return null
-    }
-    
-    // Decode payload (base64url)
-    const payload = JSON.parse(atob(parts[1]))
-    return {
-      userId: payload.id || payload.userId || payload.sub || '',
-      role: payload.role || payload.roles || ''
-    }
-  } catch (error) {
-    console.error('Error decoding token:', error)
-    return null
-  }
-}
-
-// Function to get current user ID
-export const getCurrentUserId = (): string => {
-  const userInfo = getCurrentUserInfo()
-  return userInfo?.userId || ''
-}
-
-// Function to get current user name from token
-export const getCurrentUserName = (): string => {
-  try {
-    const token = getCurrentToken()
-    if (!token) {
-      return 'Unknown User'
-    }
-    
-    const parts = token.split('.')
-    if (parts.length !== 3 || !parts[1]) {
-      return 'Unknown User'
-    }
-    
-    const payload = JSON.parse(atob(parts[1]))
-    return payload.name || payload.username || payload.sub || 'Unknown User'
-  } catch (error) {
-    console.error('Error decoding token for name:', error)
-    return 'Unknown User'
-  }
-}
+// Configure axios defaults
+axios.defaults.baseURL = API_BASE_URL
+axios.defaults.withCredentials = true // Enable sending cookies with requests
+axios.defaults.headers.common['Content-Type'] = 'application/json'
 
 // Role checking helper functions
-// These handle all role format variations including typos from backend
+// Now these will use data from auth store instead of decoding JWT client-side
+// Updated to match standardized uppercase role format from backend
 export const isSuperAdmin = (role?: string): boolean => {
-  const r = role || getCurrentRole()
-  return r === 'SUPERADMIN' || r === 'Superadmin' || r === 'superadmin'
+  if (!role) return false
+  return role === 'SUPERADMIN'
 }
 
 export const isAccommodationOwner = (role?: string): boolean => {
-  const r = role || getCurrentRole()
-  return r === 'ACCOMMODATION_OWNER' || 
-         r === 'Accommodation Owner' || 
-         r === 'Accomodation Owner' ||  // Typo variant from SSO
-         r === 'Accomodation owner' ||
-         r === 'accommodation_owner'
+  if (!role) return false
+  return role === 'ACCOMMODATION_OWNER'
 }
 
 export const isCustomer = (role?: string): boolean => {
-  const r = role || getCurrentRole()
-  return r === 'CUSTOMER' || r === 'Customer' || r === 'customer'
+  if (!role) return false
+  return role === 'CUSTOMER'
 }
 
-// Add request interceptor to automatically include Bearer token
+// Deprecated functions - kept for backward compatibility
+// These now return empty strings and should be replaced with auth store usage
+export const getCurrentRole = (): string => {
+  console.warn('getCurrentRole() is deprecated. Use auth store instead.')
+  return ''
+}
+
+export const getCurrentUserId = (): string => {
+  console.warn('getCurrentUserId() is deprecated. Use auth store instead.')
+  return ''
+}
+
+export const getCurrentUserName = (): string => {
+  console.warn('getCurrentUserName() is deprecated. Use auth store instead.')
+  return ''
+}
+
+export const getCurrentUserInfo = (): { userId: string; role: string } | null => {
+  console.warn('getCurrentUserInfo() is deprecated. Use auth store instead.')
+  return null
+}
+
+// Add request interceptor for logging
 axios.interceptors.request.use(
   (config) => {
-    const token = getCurrentToken()
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
+    // Cookies are sent automatically via withCredentials
     return config
   },
   (error) => {
@@ -121,10 +61,45 @@ axios.interceptors.request.use(
 )
 
 // Add response interceptor for error handling
+let isRefreshing = false
+
 axios.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config
+
     if (error.response) {
+      // Handle 401 Unauthorized
+      if (error.response.status === 401 && !originalRequest._retry) {
+        if (isRefreshing) {
+          return Promise.reject(error)
+        }
+
+        originalRequest._retry = true
+        isRefreshing = true
+
+        try {
+          // Try to refresh token or validate session
+          // For now, redirect to login
+          toast.error('Session expired', {
+            description: 'Please login again'
+          })
+          redirectToLogin()
+        } catch (refreshError) {
+          redirectToLogin()
+          return Promise.reject(refreshError)
+        } finally {
+          isRefreshing = false
+        }
+      }
+
+      // Handle 403 Forbidden
+      if (error.response.status === 403) {
+        toast.error('Access Denied', {
+          description: error.response.data?.message || 'You do not have permission to access this resource'
+        })
+      }
+
       // Log error details for debugging
       console.error('API Error:', {
         status: error.response.status,

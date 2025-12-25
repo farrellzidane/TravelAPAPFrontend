@@ -545,12 +545,11 @@ import { usePropertyStore } from '@/stores/property/property.stores'
 import { useRoomStore } from '@/stores/room/room.stores'
 import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
 import { 
-  getCurrentRole, 
-  getCurrentUserId, 
   isSuperAdmin as isSuperAdminHelper, 
   isAccommodationOwner as isAccommodationOwnerHelper, 
   isCustomer as isCustomerHelper 
 } from '@/config/axios.config'
+import { useAuthStore } from '@/stores/auth/auth.store'
 import type { Property, DateFilter } from '@/interfaces/property.interface'
 import type { Room, MaintenanceForm, CreateMaintenanceRequest } from '@/interfaces/room.interface'
 import { PROVINCE_MAP } from '@/interfaces/property.interface'
@@ -559,6 +558,7 @@ const route = useRoute()
 const router = useRouter()
 const propertyStore = usePropertyStore()
 const roomStore = useRoomStore()
+const authStore = useAuthStore()
 
 const property = ref<Property | null>(null)
 const loading = ref(false)
@@ -580,8 +580,8 @@ const maintenanceForm = ref<MaintenanceForm>({
 })
 
 // Role-based access control using helper functions
-const currentRole = computed(() => getCurrentRole())
-const currentUserId = computed(() => getCurrentUserId())
+const currentRole = computed(() => authStore.currentUserInfo?.role || '')
+const currentUserId = computed(() => authStore.currentUserInfo?.userId || '')
 const isSuperAdmin = computed(() => isSuperAdminHelper(currentRole.value))
 const isAccommodationOwner = computed(() => isAccommodationOwnerHelper(currentRole.value))
 const isCustomer = computed(() => isCustomerHelper(currentRole.value))

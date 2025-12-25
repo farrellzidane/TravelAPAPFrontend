@@ -203,25 +203,27 @@ import { userService } from '@/services/user.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import VDynamicForm from '@/components/property/VDynamicForm.vue'
 import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
-import { getCurrentRole, getCurrentUserId, getCurrentUserName, isSuperAdmin, isAccommodationOwner } from '@/config/axios.config'
+import { isSuperAdmin, isAccommodationOwner } from '@/config/axios.config'
+import { useAuthStore } from '@/stores/auth/auth.store'
 
 const router = useRouter()
 const propertyStore = usePropertyStore()
+const authStore = useAuthStore()
 
 const loadingProvinces = ref(false)
 const loadingOwners = ref(false)
 const provinces = ref<Province[]>([])
 const showBackConfirmDialog = ref(false)
 
-// Role checking using helper functions
-const currentRole = computed(() => getCurrentRole())
+// Role checking using auth store
+const currentRole = computed(() => authStore.currentUserInfo?.role || '')
 const isSuperAdminRole = computed(() => isSuperAdmin(currentRole.value))
 const isOwnerRole = computed(() => isAccommodationOwner(currentRole.value))
 const canCreateProperty = computed(() => isSuperAdminRole.value || isOwnerRole.value)
 
-// Get current user info from token
-const currentUserId = computed(() => getCurrentUserId())
-const currentUserName = computed(() => getCurrentUserName())
+// Get current user info from auth store
+const currentUserId = computed(() => authStore.currentUserInfo?.userId || '')
+const currentUserName = computed(() => authStore.currentUserInfo?.username || '')
 
 // Owner options for Superadmin - populated from API
 const ownerOptions = ref<Array<{ id: string; name: string }>>([])

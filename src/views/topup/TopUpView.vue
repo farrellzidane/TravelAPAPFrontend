@@ -91,21 +91,19 @@
 import { onMounted, computed, ref, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTopUpStore } from '@/stores/topup/topup.stores'
+import { useAuthStore } from '@/stores/auth/auth.store'
 import VDataTable from '@/components/common/VDataTable.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { TopUpTransaction } from '@/interfaces/topup.interface'
-import { getCurrentRole } from '@/config/axios.config'
 
 const router = useRouter()
 const topUpStore = useTopUpStore()
+const authStore = useAuthStore()
 const statusFilter = ref('')
 
 // Role checking
-const currentRole = computed(() => getCurrentRole())
 const isCustomer = computed(() => {
-  const role = currentRole.value
-  // Check for both formats: 'CUSTOMER' from localStorage and 'Customer' from JWT
-  return role === 'CUSTOMER' || role === 'Customer'
+  return authStore.currentUserInfo?.role === 'CUSTOMER'
 })
 
 

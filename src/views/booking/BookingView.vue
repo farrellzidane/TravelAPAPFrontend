@@ -214,7 +214,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBookingStore } from '@/stores/booking/booking.stores'
-import { getCurrentRole } from '@/config/axios.config'
+import { useAuthStore } from '@/stores/auth/auth.store'
 import type { BookingFilter } from '@/interfaces/booking.interface'
 
 const router = useRouter()
@@ -231,7 +231,8 @@ const filter = ref<BookingFilter>({
 
 // Only CUSTOMER can create bookings
 const isCustomer = computed(() => {
-  const role = getCurrentRole()
+  const authStore = useAuthStore()
+  const role = authStore.currentUserInfo?.role || ''
   // Check for both formats: 'CUSTOMER' from localStorage and 'Customer' from JWT
   return role === 'CUSTOMER' || role === 'Customer'
 })

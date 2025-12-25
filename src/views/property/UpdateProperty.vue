@@ -331,16 +331,18 @@ import type { Property, UpdatePropertyRequest, Province } from '@/interfaces/pro
 import type { UpdateRoomTypeForm } from '@/interfaces/room.interface'
 import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
-import { getCurrentRole, getCurrentUserId, isSuperAdmin, isAccommodationOwner, isCustomer } from '@/config/axios.config'
+import { isSuperAdmin, isAccommodationOwner, isCustomer } from '@/config/axios.config'
 import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
+import { useAuthStore } from '@/stores/auth/auth.store'
 
 const route = useRoute()
 const router = useRouter()
 const propertyStore = usePropertyStore()
+const authStore = useAuthStore()
 
 // Role-based access control
-const currentRole = computed(() => getCurrentRole())
-const currentUserId = computed(() => getCurrentUserId())
+const currentRole = computed(() => authStore.currentUserInfo?.role || '')
+const currentUserId = computed(() => authStore.currentUserInfo?.userId || '')
 const isSuperAdminRole = computed(() => isSuperAdmin(currentRole.value))
 const isAccommodationOwnerRole = computed(() => isAccommodationOwner(currentRole.value))
 const isCustomerRole = computed(() => isCustomer(currentRole.value))

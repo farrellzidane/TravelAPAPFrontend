@@ -115,12 +115,13 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTopUpStore } from '@/stores/topup/topup.stores'
 import { usePaymentMethodStore } from '@/stores/paymentmethod/paymentmethod.stores'
-import { getCurrentRole, getCurrentUserId } from '@/config/axios.config'
+import { useAuthStore } from '@/stores/auth/auth.store'
 import type { CreateTopUpRequest } from '@/interfaces/topup.interface'
 
 const router = useRouter()
 const topUpStore = useTopUpStore()
 const paymentMethodStore = usePaymentMethodStore()
+const authStore = useAuthStore()
 
 const formData = reactive<CreateTopUpRequest>({
   customerId: '',
@@ -131,11 +132,8 @@ const formData = reactive<CreateTopUpRequest>({
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 
-const currentRole = computed(() => getCurrentRole())
 const isCustomer = computed(() => {
-  const role = currentRole.value
-  // Check for both formats: 'CUSTOMER' from localStorage and 'Customer' from JWT
-  return role === 'CUSTOMER' || role === 'Customer'
+  return authStore.currentUserInfo?.role === 'CUSTOMER'
 })
 
 onMounted(async () => {
@@ -147,14 +145,11 @@ onMounted(async () => {
   }
   
   // Auto-fill customer ID if user is customer
-  if (isCustomer.value) {
-    const userId = getCurrentUserId()
-    formData.customerId = userId
-    
-    if (!userId) {
-      console.error('Failed to get user ID from token')
-      errorMessage.value = 'Failed to retrieve customer information. Please try logging in again.'
-    }
+  if (isCustomer.value && authStore.currentUserInfo?.userId) {
+    formData.customerId = authStore.currentUserInfo.userId
+  } else {
+    console.error('Failed to get user ID from auth store')
+    errorMessage.value = 'Failed to retrieve customer information. Please try logging in again.'
   }
   
   // Load payment methods

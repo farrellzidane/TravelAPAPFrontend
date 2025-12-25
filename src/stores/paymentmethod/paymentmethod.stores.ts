@@ -3,7 +3,7 @@ import type { CommonResponseInterface } from '@/interfaces/common.response.inter
 import { defineStore } from 'pinia'
 import axios, { type AxiosResponse } from 'axios'
 import { toast } from 'vue-sonner'
-import api from '@/lib/safe.api'
+import api from '@/config/axios.config'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 

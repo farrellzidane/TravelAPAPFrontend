@@ -1,102 +1,28 @@
 // src/lib/auth.ts
-const TOKEN_STORAGE_KEY = "auth_token";
+/**
+ * Authentication utilities
+ * Now using httpOnly cookies for secure token storage
+ * Tokens are managed by backend and sent automatically via cookies
+ */
 
-const TOKEN_COOKIE_NAME =
-  import.meta.env.VITE_AUTH_TOKEN_COOKIE_NAME || "token";
-
-const LOGIN_URL =
-  import.meta.env.VITE_AUTH_LOGIN_URL || "http://localhost/";
+const LOGIN_URL = "/login";
 
 /**
- * Ambil token dari cookie browser.
+ * Check if user is authenticated
+ * We'll rely on API calls with cookies - if API returns 401, user is not authenticated
  */
-function getTokenFromCookie(): string | null {
-  if (typeof document === "undefined") return null;
-
-  const raw = document.cookie; // contoh: "token=abc.xyz; other=123"
-  const parts = raw.split(";").map((c) => c.trim());
-
-  const match = parts.find((c) =>
-    c.startsWith(`${TOKEN_COOKIE_NAME}=`),
-  );
-
-  if (!match) return null;
-
-  const value = match.split("=", 2)[1];
-  if (!value) return null;
-
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
+export function isAuthenticated(): boolean {
+  // In cookie-based auth, we check if user info exists in store
+  // The actual auth state is managed by the auth store
+  return true; // Let the auth store handle this
 }
 
 /**
- * Ambil token yang bisa dipakai FE:
- * 1. Prioritas: Coba dari cookie (token paling fresh dari login)
- * 2. Fallback: Baca dari localStorage
- */
-export function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-
-  // Prioritas 1: Cek cookie terlebih dahulu (token fresh dari login)
-  let fromCookie = getTokenFromCookie();
-  if (fromCookie) {
-    fromCookie = fromCookie.replace(/^"|"$/g, '');
-    
-    // Cek apakah token di cookie berbeda dengan localStorage
-    const fromStorage = window.localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (fromStorage && fromStorage !== fromCookie) {
-      console.log('🔄 Token mismatch detected! Clearing old localStorage token');
-      console.log('Old token (first 50 chars):', fromStorage.substring(0, 50));
-      console.log('New token (first 50 chars):', fromCookie.substring(0, 50));
-    }
-    
-    // Update localStorage dengan token terbaru dari cookie
-    window.localStorage.setItem(TOKEN_STORAGE_KEY, fromCookie);
-    console.log('✅ Using token from cookie');
-    return fromCookie;
-  }
-
-  // Fallback: Cek localStorage jika cookie tidak ada
-  let fromStorage = window.localStorage.getItem(TOKEN_STORAGE_KEY);
-  if (fromStorage) {
-    // Strip quotes from stored token if present
-    fromStorage = fromStorage.replace(/^"|"$/g, '');
-    // Update localStorage with cleaned token
-    if (fromStorage !== window.localStorage.getItem(TOKEN_STORAGE_KEY)) {
-      window.localStorage.setItem(TOKEN_STORAGE_KEY, fromStorage);
-    }
-    console.log('⚠️ Using token from localStorage (no cookie found)');
-    return fromStorage;
-  }
-
-  console.log('❌ No token found in cookie or localStorage');
-  return null;
-}
-
-/**
- * Opsi kalau nanti butuh set token manual.
- */
-export function setToken(token: string) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(TOKEN_STORAGE_KEY, token);
-}
-
-/**
- * Opsi kalau nanti butuh logout.
- */
-export function clearToken() {
-  if (typeof window === "undefined") return;
-  window.localStorage.removeItem(TOKEN_STORAGE_KEY);
-}
-
-/**
- * Kalau token tidak ada, redirect ke facade login.
+ * Redirect to login page
  */
 export function redirectToLogin(): never {
-  window.location.href = `/login`;
+  window.location.href = LOGIN_URL;
   
   throw new Error("No token available, redirecting to login");
 }
+

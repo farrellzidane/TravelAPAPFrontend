@@ -1,6 +1,6 @@
 import axios, { type AxiosResponse } from 'axios'
 import type { PaymentMethod, CreatePaymentMethodRequest, UpdatePaymentMethodStatusRequest, ApiResponse } from '@/interfaces/paymentmethod.interface'
-import api from '@/lib/safe.api'
+import api from '@/config/axios.config'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 

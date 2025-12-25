@@ -4,7 +4,7 @@ import axios from 'axios'
 import { toast } from 'vue-sonner'
 import type { CommonResponseInterface } from '@/interfaces/common.response.interface'
 import { useRouter } from 'vue-router'
-import api from '@/lib/safe.api'
+import api from '@/config/axios.config'
 
 const baseUserProfileUrl = import.meta.env.VITE_API_URL + '/profile'
 
