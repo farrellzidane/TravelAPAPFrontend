@@ -191,15 +191,16 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePaymentMethodStore } from '@/stores/paymentmethod/paymentmethod.stores'
-import { getCurrentRole } from '@/config/axios.config'
+import { useAuthStore } from '@/stores/auth/auth.store'
 import type { PaymentMethod, UpdatePaymentMethodStatusRequest } from '@/interfaces/paymentmethod.interface'
 import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
 
 const router = useRouter()
 const paymentMethodStore = usePaymentMethodStore()
+const authStore = useAuthStore()
 
-const currentRole = computed(() => getCurrentRole())
-const isCustomer = computed(() => currentRole.value === 'CUSTOMER' || currentRole.value === 'Customer')
+const currentRole = computed(() => authStore.currentUserInfo?.role || '')
+const isCustomer = computed(() => currentRole.value === 'CUSTOMER')
 
 const updatingId = ref<string | null>(null)
 const deletingId = ref<string | null>(null)

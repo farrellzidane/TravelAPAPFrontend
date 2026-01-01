@@ -203,7 +203,6 @@ import { userService } from '@/services/user.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import VDynamicForm from '@/components/property/VDynamicForm.vue'
 import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
-import { isSuperAdmin, isAccommodationOwner } from '@/config/axios.config'
 import { useAuthStore } from '@/stores/auth/auth.store'
 
 const router = useRouter()
@@ -217,8 +216,8 @@ const showBackConfirmDialog = ref(false)
 
 // Role checking using auth store
 const currentRole = computed(() => authStore.currentUserInfo?.role || '')
-const isSuperAdminRole = computed(() => isSuperAdmin(currentRole.value))
-const isOwnerRole = computed(() => isAccommodationOwner(currentRole.value))
+const isSuperAdminRole = computed(() => currentRole.value === 'SUPERADMIN')
+const isOwnerRole = computed(() => currentRole.value === 'ACCOMMODATION_OWNER')
 const canCreateProperty = computed(() => isSuperAdminRole.value || isOwnerRole.value)
 
 // Get current user info from auth store

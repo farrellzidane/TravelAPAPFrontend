@@ -94,7 +94,13 @@
           <!-- Admin Actions (for Superadmin only) -->
           <div v-if="isSuperAdmin && topUpStore.currentTopUp.status === 'Pending'" class="border-t pt-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Update Status</h3>
-            <div class="flex gap-4">
+            <div class="flex gap-4 flex-wrap">
+              <button
+                @click="router.push({ name: 'topup-update-status', params: { id: topUpId } })"
+                class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-md transition duration-300"
+              >
+                Go to Update Status Page
+              </button>
               <button
                 @click="updateStatus('Success')"
                 :disabled="isUpdating"
@@ -158,13 +164,14 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTopUpStore } from '@/stores/topup/topup.stores'
-import { getCurrentRole } from '@/config/axios.config'
+import { useAuthStore } from '@/stores/auth/auth.store'
 import type { UpdateTopUpStatusRequest } from '@/interfaces/topup.interface'
 import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
 
 const router = useRouter()
 const route = useRoute()
 const topUpStore = useTopUpStore()
+const authStore = useAuthStore()
 
 const isUpdating = ref(false)
 const isDeleting = ref(false)
@@ -174,7 +181,7 @@ const pendingStatus = ref<string>('')
 
 const topUpId = ref(route.params.id as string)
 
-const currentRole = computed(() => getCurrentRole())
+const currentRole = computed(() => authStore.currentUserInfo?.role || '')
 const isSuperAdmin = computed(() => currentRole.value === 'SUPERADMIN')
 
 onMounted(async () => {

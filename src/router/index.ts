@@ -18,12 +18,15 @@ import ChartView from '../views/statistics/ChartView.vue'
 import TopUpView from '../views/topup/TopUpView.vue'
 import CreateTopUp from '../views/topup/CreateTopUp.vue'
 import TopUpDetail from '../views/topup/TopUpDetail.vue'
+import UpdateTopUpStatus from '../views/topup/UpdateTopUpStatus.vue'
 import PaymentMethodView from '../views/paymentmethod/PaymentMethodView.vue'
 import CreatePaymentMethod from '../views/paymentmethod/CreatePaymentMethod.vue'
 import PropertyReviewsView from '../views/review/PropertyReviewsView.vue'
 import CustomerReviewsView from '../views/review/CustomerReviewsView.vue'
 import ReviewDetail from '../views/review/ReviewDetail.vue'
 import CreateReview from '../views/review/CreateReview.vue'
+import BillView from '../views/bill/BillView.vue'
+import BillDetail from '../views/bill/BillDetail.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -118,6 +121,56 @@ const router = createRouter({
       component: TopUpDetail,
     },
     {
+      path: '/topup/:id/update-status',
+      name: 'topup-update-status',
+      component: UpdateTopUpStatus,
+      beforeEnter: (to, from, next) => {
+        const authStore = useAuthStore()
+        if (!isSuperAdmin(authStore.userRole || undefined)) {
+          toast.error('Access Denied', {
+            description: 'Only Superadmin can update top-up status'
+          })
+          next('/topup')
+        } else {
+          next()
+        }
+      }
+    },
+    {
+      path: '/bills',
+      name: 'bills',
+      component: BillView,
+      beforeEnter: (to, from, next) => {
+        const authStore = useAuthStore()
+        const role = authStore.userRole || undefined
+        if (!isSuperAdmin(role) && !isCustomer(role) && !isAccommodationOwner(role)) {
+          toast.error('Access Denied', {
+            description: 'You do not have access to Bills'
+          })
+          next('/')
+        } else {
+          next()
+        }
+      }
+    },
+    {
+      path: '/bills/:id',
+      name: 'bill-detail',
+      component: BillDetail,
+      beforeEnter: (to, from, next) => {
+        const authStore = useAuthStore()
+        const role = authStore.userRole || undefined
+        if (!isSuperAdmin(role) && !isCustomer(role) && !isAccommodationOwner(role)) {
+          toast.error('Access Denied', {
+            description: 'You do not have access to Bills'
+          })
+          next('/')
+        } else {
+          next()
+        }
+      }
+    },
+    {
       path: '/payment-method',
       name: 'payment-method',
       component: PaymentMethodView,
@@ -153,6 +206,22 @@ const router = createRouter({
       path: '/reviews/property/:propertyId',
       name: 'PropertyReviews',
       component: PropertyReviewsView,
+    },
+    {
+      path: '/reviews/my',
+      name: 'MyReviews',
+      component: CustomerReviewsView,
+      beforeEnter: (to, from, next) => {
+        const authStore = useAuthStore()
+        if (!isCustomer(authStore.userRole || undefined)) {
+          toast.error('Access Denied', {
+            description: 'Only customers can access this page'
+          })
+          next('/')
+        } else {
+          next()
+        }
+      }
     },
     {
       path: '/reviews/customer',

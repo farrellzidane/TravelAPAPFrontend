@@ -215,8 +215,10 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { reviewService } from '@/services/review.service'
-import { isCustomer } from '@/config/axios.config'
+import { useAuthStore } from '@/stores/auth/auth.store'
 import type { CreateReviewRequest } from '@/interfaces/review.interface'
+
+const authStore = useAuthStore()
 
 const router = useRouter()
 const route = useRoute()
@@ -320,7 +322,7 @@ const handleSubmit = async () => {
 
 onMounted(() => {
   // Check if user is customer
-  if (!isCustomer()) {
+  if (authStore.currentUserInfo?.role !== 'CUSTOMER') {
     toast.error('Only customers can create reviews')
     router.push({ name: 'home' })
     return

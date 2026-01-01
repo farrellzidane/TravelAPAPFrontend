@@ -106,6 +106,10 @@ const isCustomer = computed(() => {
   return authStore.currentUserInfo?.role === 'CUSTOMER'
 })
 
+const isSuperAdmin = computed(() => {
+  return authStore.currentUserInfo?.role === 'SUPERADMIN'
+})
+
 
 
 onMounted(async () => {
@@ -126,6 +130,10 @@ const goToCreateTopUp = () => {
 
 const goToDetail = (id: string) => {
   router.push({ name: 'topup-detail', params: { id } })
+}
+
+const goToUpdateStatus = (id: string) => {
+  router.push({ name: 'topup-update-status', params: { id } })
 }
 
 const formatCurrency = (amount: number): string => {
@@ -201,13 +209,27 @@ const columns: ColumnDef<TopUpTransaction>[] = [
     },
   },
   {
-    id: 'actions',
-    header: 'Action',
+    accessorKey: 'actions',
+    header: 'Actions',
     cell: ({ row }) => {
-      return h('button', {
-        onClick: () => goToDetail(row.original.transactionId),
-        class: 'px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105'
-      }, 'Detail')
+      const buttons = [
+        h('button', {
+          onClick: () => goToDetail(row.original.transactionId),
+          class: 'px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105'
+        }, 'Detail')
+      ]
+      
+      // Add Update Status button for Superadmin if status is Pending
+      if (isSuperAdmin.value && row.original.status === 'Pending') {
+        buttons.push(
+          h('button', {
+            onClick: () => goToUpdateStatus(row.original.transactionId),
+            class: 'ml-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105'
+          }, 'Update Status')
+        )
+      }
+      
+      return h('div', { class: 'flex gap-2' }, buttons)
     },
   },
 ]

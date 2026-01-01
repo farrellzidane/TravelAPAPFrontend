@@ -544,11 +544,6 @@ import { propertyService } from '@/services/property.service'
 import { usePropertyStore } from '@/stores/property/property.stores'
 import { useRoomStore } from '@/stores/room/room.stores'
 import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
-import { 
-  isSuperAdmin as isSuperAdminHelper, 
-  isAccommodationOwner as isAccommodationOwnerHelper, 
-  isCustomer as isCustomerHelper 
-} from '@/config/axios.config'
 import { useAuthStore } from '@/stores/auth/auth.store'
 import type { Property, DateFilter } from '@/interfaces/property.interface'
 import type { Room, MaintenanceForm, CreateMaintenanceRequest } from '@/interfaces/room.interface'
@@ -579,12 +574,12 @@ const maintenanceForm = ref<MaintenanceForm>({
   maintenanceEnd: ''
 })
 
-// Role-based access control using helper functions
+// Role-based access control
 const currentRole = computed(() => authStore.currentUserInfo?.role || '')
 const currentUserId = computed(() => authStore.currentUserInfo?.userId || '')
-const isSuperAdmin = computed(() => isSuperAdminHelper(currentRole.value))
-const isAccommodationOwner = computed(() => isAccommodationOwnerHelper(currentRole.value))
-const isCustomer = computed(() => isCustomerHelper(currentRole.value))
+const isSuperAdmin = computed(() => currentRole.value === 'SUPERADMIN')
+const isAccommodationOwner = computed(() => currentRole.value === 'ACCOMMODATION_OWNER')
+const isCustomer = computed(() => currentRole.value === 'CUSTOMER')
 
 // Determine if user can manage this specific property
 const canManageProperty = computed(() => {

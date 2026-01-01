@@ -290,7 +290,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { bookingService } from '@/services/booking.service'
 import { propertyService } from '@/services/property.service'
-import { getCurrentRole } from '@/config/axios.config'
+import { useAuthStore } from '@/stores/auth/auth.store'
 import type { UpdateBookingRequest, Booking } from '@/interfaces/booking.interface'
 import type { Property } from '@/interfaces/property.interface'
 import type { RoomType, Room } from '@/interfaces/room.interface'
@@ -298,6 +298,7 @@ import VConfirmDialog from '@/components/common/VConfirmDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 
 const submitting = ref(false)
 const cancelling = ref(false)
@@ -659,8 +660,7 @@ const confirmCancel = async () => {
 
 onMounted(() => {
   // Role validation: Only CUSTOMER can update booking
-  const currentRole = getCurrentRole()
-  if (currentRole !== 'CUSTOMER') {
+  if (authStore.currentUserInfo?.role !== 'CUSTOMER') {
     toast.error('Access denied: Only customers can update bookings')
     router.push('/bookings')
     return

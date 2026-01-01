@@ -160,10 +160,11 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { reviewService } from '@/services/review.service'
-import { getCurrentRole, getCurrentUserId, isCustomer } from '@/config/axios.config'
+import { useAuthStore } from '@/stores/auth/auth.store'
 import type { Review } from '@/interfaces/review.interface'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const reviews = ref<Review[]>([])
 const isLoading = ref(true)
@@ -195,15 +196,14 @@ const loadReviews = async () => {
     error.value = null
 
     // Check if user is customer
-    const role = getCurrentRole()
-    if (!isCustomer(role)) {
+    if (authStore.currentUserInfo?.role !== 'CUSTOMER') {
       toast.error('Only customers can access this page')
       router.push({ name: 'Home' })
       return
     }
 
     // Get current user ID
-    const customerID = getCurrentUserId()
+    const customerID = authStore.currentUserInfo?.userId
     if (!customerID) {
       toast.error('Failed to get customer information')
       router.push({ name: 'Home' })
