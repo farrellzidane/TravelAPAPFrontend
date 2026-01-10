@@ -1,5 +1,6 @@
 import './assets/main.css'
 import './config/axios.config' // Import axios config to setup interceptors
+import 'flowbite' // Import flowbite JavaScript
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
